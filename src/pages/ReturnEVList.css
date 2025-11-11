@@ -1,0 +1,83 @@
+.return-ev-list-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(var(--vh, 1vh) * 100 - 130px);
+  overflow: hidden;
+  width: 100vw;
+  margin: 0 auto;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+.return-ev-list-count {
+  margin-bottom: 16px;
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+}
+
+.return-sticky-search-section {
+  flex-shrink: 0;
+  position: sticky;
+  background: #ffffff;
+  z-index: 20;
+  padding: 5px 13px 20px 13px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+
+.return-searchbar-heading {
+    display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 4px 6px 4px;
+}
+
+.return-searchbar-heading {
+  font-weight: 700;
+  font-size: 18px;
+  color: #000;
+  margin: 0;
+  padding: 10px 4px 6px 4px;
+}
+
+.return-ev-list-count {
+  font-weight: 600;
+  font-size: 14px;
+  color: #5a5a5a;
+  margin: 0;
+}
+
+.return-ev-cards-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #f3f3f3;
+  padding-bottom: 16px;
+}
+
+.return-all-ev-cards.has-cards {
+  padding: 8px 10px 3px 10px;
+  background-color: #f3f3f3;
+}
+
+.return-all-ev-cards {
+  padding: 0 10px;
+}
+
+.return-ev-cards-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.return-ev-cards-scroll-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+@media (max-width: 600px) {
+  .return-ev-list-page {
+    height: calc(var(--vh, 1vh) * 100 - 130px);
+  }
+  .return-ev-list-count {
+    font-size: 14px;
+  }
+}

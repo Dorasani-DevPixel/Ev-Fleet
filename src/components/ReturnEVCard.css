@@ -1,0 +1,87 @@
+.returnCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  margin-bottom: 10px;
+}
+
+.returnCard-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.returnCard-topRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.returnCard-plate {
+  color: #004aad;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.returnCard-model {
+  color: #000000;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.returnCard-rider {
+  font-size: 13px;
+  color: #7a7a7a;
+  margin-top: 2px;
+}
+
+.returnCard-removeBtn {
+  background-color: #ffe4e4;
+  border: none;
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.returnCard-icon {
+  color: #ab0000;
+}
+
+.returnCard-removeBtn:hover {
+  background-color: #ffc8c8;
+  transform: scale(1.05);
+  transition: 0.2s ease;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .returnCard {
+    padding: 10px 12px;
+  }
+
+  .returnCard-plate,
+  .returnCard-model {
+    font-size: 13.5px;
+  }
+
+  .returnCard-rider {
+    font-size: 12.5px;
+  }
+
+  .returnCard-removeBtn {
+    background-color: #ffe4e4;
+  }
+
+  .returnCard-icon {
+    color: #ab0000;
+  }
+}

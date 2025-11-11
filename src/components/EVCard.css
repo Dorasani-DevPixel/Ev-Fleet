@@ -1,0 +1,113 @@
+.evCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 16px 18px;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.evCard-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.evCard-plate {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1e4c9a;
+  margin: 0 0 4px 0;
+}
+
+.evCard-model {
+  font-size: 15px;
+  font-weight: 500;
+  color: #000;
+  margin: 0;
+}
+
+.evCard-right {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+}
+
+.evCard-pricing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.evCard-rent,
+.evCard-deposit {
+  font-size: 13px;
+  color: #555;
+  margin: 0;
+}
+
+.evCard-rent {
+  margin-bottom: 4px;
+}
+
+.evCard-assignBtn {
+  background-color: #c1dfff;
+  border: none;
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.evCard-icon {
+  color: #1e4c9a;
+  fill: #1e4c9a;
+}
+
+.evCard-assignBtn:hover {
+  background: #d6e4ff;
+  transform: scale(1.05);
+  transition: 0.2s ease;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .evCard {
+    flex-direction: row;
+    align-items: center;
+    padding: 14px 12px;
+  }
+
+  .evCard-plate {
+    font-size: 16px;
+  }
+
+  .evCard-model {
+    font-size: 14px;
+  }
+
+  .evCard-rent,
+  .evCard-deposit {
+    font-size: 12px;
+  }
+
+  .evCard-right {
+    gap: 20px;
+  }
+
+  .evCard-assignBtn {
+    background-color: #c1dfff;
+    padding: 6px;
+  }
+
+  .evCard-icon {
+    color: #1e4c9a;
+    fill: #1e4c9a;
+  }
+}
