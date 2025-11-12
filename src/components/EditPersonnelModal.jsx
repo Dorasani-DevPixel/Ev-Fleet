@@ -20,7 +20,7 @@ export default function EditPersonnelModal({ open, onClose, personnel }) {
   const [loading, setLoading] = useState(false);
   const [loadingSupervisor, setLoadingSupervisor] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
-
+    const personnelStatuses = ["Active", "Inactive", "On Leave", "Terminated"];
   const positions = ["Rider", "Area Manager", "City Head", "Regional Leader"];
  
 
@@ -143,26 +143,22 @@ export default function EditPersonnelModal({ open, onClose, personnel }) {
 
             {/* Employment Status */}
             <TextField
-          
+              select
               label="Employment Status"
               name="employmentStatus"
               value={formData.employmentStatus || ""}
               onChange={handleChange}
               fullWidth
               InputProps={{ sx: { height: 40 } }}
-            />
+            >{personnelStatuses.map((pos) => (
+                            <MenuItem key={pos} value={pos}>
+                              {pos}
+                            </MenuItem>
+                          ))}
+                        </TextField>
             
 
-            {/* Assignment Status */}
-            <TextField
-              
-              label="Assignment Status"
-              name="assignmentStatus"
-              value={formData.assignmentStatus || ""}
-              onChange={handleChange}
-              fullWidth
-              InputProps={{ sx: { height: 40 } }}
-            />
+          
              
 
             {/* Location */}

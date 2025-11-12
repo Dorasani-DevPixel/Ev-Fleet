@@ -48,6 +48,7 @@ export default function AddPersonnelModal({ open, onClose }) {
   const [successData, setSuccessData] = useState(null);
   const [successOpen, setSuccessOpen] = useState(false);
   const positions = ["Rider", "City Head", "Regional Leader","EV Executive","EV Admin"];
+  const personnelStatuses = ["Active", "Inactive", "On Leave", "Terminated"];
 
   // Update field values
   const handleChange = (e) => {
@@ -215,7 +216,26 @@ Phone: ${person.phone}`;
                 </MenuItem>
               ))}
             </TextField>
-
+             {/* Status */}
+            <TextField
+              required
+              select
+              label="Status"
+              name="Status"
+              value={form.position}
+              onChange={handleChange}
+              variant="outlined"
+              placeholder="Select Position"
+              fullWidth
+              size="small"
+              InputLabelProps={{ sx: { "& .MuiFormLabel-asterisk": { color: "red" } } }}
+            >
+              {personnelStatuses.map((pos) => (
+                <MenuItem key={pos} value={pos}>
+                  {pos}
+                </MenuItem>
+              ))}
+            </TextField>
             {/* Location */}
             <TextField
               required

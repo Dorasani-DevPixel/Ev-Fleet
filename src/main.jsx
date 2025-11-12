@@ -13,7 +13,8 @@ import VehicleTable from "./pages/VehicleTable.jsx";
 import AssignmentsTable from "./pages/AssignmentsTable.jsx";
 import ReturnEVList from "./pages/ReturnEVList.jsx";
 import PersonnelTable from "./pages/PersonnelTable.jsx";
-
+import AssignmentActive from "./pages/AssignmentActive.jsx";
+import EVAssignmentDetailPage from "./pages/EVAssignmentDetailPage.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
@@ -29,8 +30,10 @@ createRoot(document.getElementById("root")).render(
         {/* Parent route */}
         <Route path="/home" element={<Home />}>
           <Route path="vehicles" element={<VehicleTable />} />
-        
-            <Route path="assignments" element={<EVList />} />
+          <Route path="assignmentsactive" element={<AssignmentActive/>}/>
+            <Route path="assignmentsactive/assignments" element={<EVList />} />
+           <Route path="assignmentsactive/detail/:id" element={<EVAssignmentDetailPage />}/>
+
           <Route path="assignments/riderAssignment" element={<RiderAssignment />} />
           <Route path="return-ev" element={<ReturnEVList />} />
             <Route path="return-ev/evreturn" element={<ReturnEv />} />

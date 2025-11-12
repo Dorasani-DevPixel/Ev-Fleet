@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "ev-fleet-management"
+  },
+  "targets": {
+    "ev-fleet-management": {
+      "hosting": {
+        "admin": [
+          "ev-fleet-management-admin"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

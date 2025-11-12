@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import SearchBar from "../components/SearchBar";
 import EVCard from "../components/EVCard";
 import "./EVList.css";
-import { Box, CircularProgress } from "@mui/material";
-
+import { Box, CircularProgress,IconButton } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useNavigate } from "react-router-dom";
 export default function EVList() {
   const [search, setSearch] = useState("");
   const [vehicles, setVehicles] = useState([]);
@@ -12,7 +13,7 @@ export default function EVList() {
   const [error, setError] = useState("");
   const [nextPageToken, setNextPageToken] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
-
+   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const TOKEN = import.meta.env.VITE_API_SECRET_KEY;
 
@@ -191,10 +192,15 @@ export default function EVList() {
 
   return (
     <div className="ev-list-page">
+   
       <div className="sticky-search-section">
         <div className="heading-row">
+         <IconButton onClick={() => navigate("/home/assignmentsactive")} color="primary">
+          <ArrowBackIcon />
+        </IconButton>
           <h3 className="searchbar-heading">
-            <strong>Link EV to Rider</strong>
+           
+            <strong> Link EV to Rider</strong>
           </h3>
           <p className="ev-list-count">
             <strong>Count: {totalCount}</strong>

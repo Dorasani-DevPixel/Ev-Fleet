@@ -44,11 +44,11 @@ export const updateDepositDetails = async (assignmentId, depositAmount) => {
   try {
     const url = `${ENDPOINTS.ASSIGNMENTS1}/${assignmentId}/edit`;
     console.log("PUT URL:", url);
-    console.log("Request body:", { depositAmount });
+    console.log("Request body:", { epositAmountCashPaid });
 
     const response = await api.put(
       url,
-      { depositAmount }, // ✅ sends { "depositAmount": 50090 }
+      { epositAmountCashPaid }, // ✅ sends { "depositAmount": 50090 }
       {
         headers: { "Content-Type": "application/json" },
       }
@@ -81,4 +81,27 @@ export const updateReturnDepositDetails = async (assignmentId, depositAmountRetu
   }
 };
 
+export const createDepositNote = async (assignmentId, content, type, phase) => {
+  try {
+    const url = `${ENDPOINTS.ASSIGNMENTS1}/${assignmentId}/notes`;
 
+    // 🔹 Dynamic payload based on what you pass
+    const body = {
+      content,
+      type,   // e.g., "PAYMENT" or "IMAGE"
+      phase,  // e.g., "deposit" or "return"
+    };
+
+    console.log("📤 Creating note:", body);
+
+    const response = await api.post(url, body, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    console.log("🟢 Note created successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Failed to create deposit note:", error);
+    throw error;
+  }
+};

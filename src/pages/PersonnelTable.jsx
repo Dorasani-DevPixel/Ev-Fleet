@@ -19,7 +19,7 @@ import {
   MenuItem
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { fetchPersonnelDashboard,searchPersonnel } from "../api/personnelService"; // ✅ API call
+import { fetchPersonnelDashboard,searchPersonnel } from "../api/personnelService"; 
 import AddPersonnelModal from "../components/AddPersonnelModal";
 import EditPersonnelModal from "../components/EditPersonnelModal";
 
@@ -58,32 +58,61 @@ const [positionFilter, setPositionFilter] = useState("All");
     };
   // ✅ Fetch personnel data from API
   const fetchPersonnel = async (page) => {
-    if (loading) return;
-    setLoading(true);
-    try {
-      const token = pageTokens[page] || null;
-      const response = await fetchPersonnelDashboard(token);
-      const personnel = response?.personnel || [];
+  if (loading) return;
+  setLoading(true);
 
-      setPageData((prev) => ({ ...prev, [page]: personnel }));
+  try {
+    const token = pageTokens[page] || null;
+    let response;
 
-      if (response.nextPageToken) {
-        setPageTokens((prev) => ({
-          ...prev,
-          [page + 1]: response.nextPageToken,
-        }));
-        setPageCount((prev) => Math.max(prev, page + 1));
-      }
-    } catch (err) {
-      console.error("Error fetching personnel:", err);
-    } finally {
-      setLoading(false);
+    // ✅ If filters/search are applied → use search API
+    if (searchQuery.trim() || (positionFilter && positionFilter !== "All")) {
+      response = await searchPersonnel(searchQuery.trim(), positionFilter, token);
+    } else {
+      // ✅ Otherwise → show normal personnel data
+      response = await fetchPersonnelDashboard(token);
     }
-  };
 
-  useEffect(() => {
-    fetchPersonnel(1);
-  }, []);
+    const personnel = response?.personnel || [];
+
+    setPageData((prev) => ({ ...prev, [page]: personnel }));
+
+    if (response.nextPageToken) {
+      setPageTokens((prev) => ({
+        ...prev,
+        [page + 1]: response.nextPageToken,
+      }));
+      setPageCount((prev) => Math.max(prev, page + 1));
+    } else {
+      setPageCount(page); // no next page available
+    }
+  } catch (err) {
+    console.error("Error fetching personnel:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+useEffect(() => {
+  const delayDebounce = setTimeout(() => {
+    setPageData({ 1: [] });
+    setPageTokens({ 1: null });
+    setCurrentPage(1);
+    setPageCount(1);
+
+    if (!searchQuery.trim() && positionFilter === "All") {
+      fetchPersonnel(1);
+    } else {
+      fetchPersonnel(1);
+    }
+  }, 1000); 
+
+  return () => clearTimeout(delayDebounce);
+}, [searchQuery, positionFilter]);
+
+
 
   // ✅ Infinite scroll logic
   useEffect(() => {
@@ -268,13 +297,14 @@ const [positionFilter, setPositionFilter] = useState("All");
               })}
             </TableBody>
           </Table>
-        </TableContainer>
-
-        {loading && (
+           {loading && (
           <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
             <CircularProgress />
           </Box>
         )}
+        </TableContainer>
+
+       
 
         {/* ✅ Pagination Footer */}
         <Box

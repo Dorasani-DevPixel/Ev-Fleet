@@ -20,6 +20,7 @@ export default function EditVehicleModal({ open, onClose, vehicle }) {
    const [addedVehicle, setAddedVehicle] = useState(null);
     const [vehicleSuccessOpen, setVehicleSuccessOpen] = useState(false);
   const frequencies = ["Per Day", "Per Week", "Per Month"];
+     const statuses = [ "New Deploy","Active","Repair","Accident","Idle","FR","PS"];
   useEffect(() => {
     setFormData(vehicle || {});
     console.log("data",formData);
@@ -104,13 +105,14 @@ export default function EditVehicleModal({ open, onClose, vehicle }) {
             InputProps={{ sx: { height: 40 } }}
           />
           <TextField
+            select
             label="Status"
             name="status"
             value={formData.status || ""}
             onChange={handleChange}
             fullWidth
             InputProps={{ sx: { height: 40 } }}
-          />
+          > {statuses.map((f) => <MenuItem key={f} value={f}>{f}</MenuItem>)} </TextField>
           <TextField
             label="Location"
             name="location"

@@ -110,7 +110,7 @@ export default function VehicleTable() {
         statusFilter !== "All" ||
         vendorFilter !== "All" ||
         locationFilter !== "All";
-
+  
       if (useFilterAPI) {
         const body = {
           vehicleNumber:
@@ -122,7 +122,7 @@ export default function VehicleTable() {
           location: locationFilter === "All" ? "" : locationFilter,
           pageToken: token,
         };
-
+        console.log("body",body);
         const response = await fetch(
           "https://evbackend-vajk.onrender.com/api/vehicles/filter",
           {

@@ -9,7 +9,7 @@ export default function Home() {
 
   const tabs = [
     { label: "Vehicles", path: "vehicles" },
-    { label: "Assignments", path: "assignments" },
+    { label: "Assignments", path: "assignmentsactive" },
     { label: "Return EV", path: "return-ev" },
     { label: "Personnel", path: "personnel" },
   ];

@@ -35,6 +35,7 @@ export default function AddVehicleModal({ open, onClose }) {
   const [loadingPlate, setLoadingPlate] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
    const frequencies = ["Per Day", "Per Week", "Per Month"];
+   const statuses = [ "New Deploy","Active","Repair","Accident","Idle","FR","PS"];
   useEffect(() => {
     if (!open) {
       setForm({
@@ -169,7 +170,20 @@ export default function AddVehicleModal({ open, onClose }) {
             size="small"
             InputLabelProps={{ sx: { "& .MuiFormLabel-asterisk": { color: "red" } } }}
           />
-
+          {/* Status */}
+          <TextField
+            select
+            required
+            label="Status"
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            variant="outlined"
+            placeholder="Enter Status"
+            fullWidth
+            size="small"
+            InputLabelProps={{ sx: { "& .MuiFormLabel-asterisk": { color: "red" } } }}
+          >  {statuses.map((f) => <MenuItem key={f} value={f}>{f}</MenuItem>)} </TextField>
           {/* Deposit Amount */}
           <TextField
             required
@@ -243,19 +257,7 @@ export default function AddVehicleModal({ open, onClose }) {
             InputLabelProps={{ sx: { "& .MuiFormLabel-asterisk": { color: "red" } } }}
           />
 
-          {/* Status */}
-          <TextField
-            required
-            label="Status"
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-            variant="outlined"
-            placeholder="Enter Status"
-            fullWidth
-            size="small"
-            InputLabelProps={{ sx: { "& .MuiFormLabel-asterisk": { color: "red" } } }}
-          />
+          
 
           {/* Battery Type */}
           <TextField

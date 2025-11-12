@@ -59,3 +59,22 @@ export const updatePersonnel = async (id, data) => {
   }
 };
 
+// ✅ Search Personnel by query, position, and optional pageToken
+export const searchPersonnel = async (query, position, pageToken = null) => {
+  try {
+    // Build URL dynamically
+    let url = `https://evbackend-m56s.onrender.com/api/personnel/search?query=${encodeURIComponent(query)}&position=${encodeURIComponent(position)}`;
+    if (pageToken) {
+      url += `&pageToken=${encodeURIComponent(pageToken)}`;
+    }
+
+    // Call API
+    const response = await api.get(url);
+
+    // Return response data
+    return response.data;
+  } catch (error) {
+    console.error("Error searching personnel:", error);
+    throw error;
+  }
+};
