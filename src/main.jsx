@@ -25,7 +25,7 @@ createRoot(document.getElementById("root")).render(
         }}
       />
       <Routes>
-        <Route path="/" element={<App />} />
+        <Route path="/" element={<Home />} />
 
         {/* Parent route */}
         <Route path="/home" element={<Home />}>

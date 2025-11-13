@@ -105,3 +105,23 @@ export const createDepositNote = async (assignmentId, content, type, phase) => {
     throw error;
   }
 };
+
+export const searchActiveAssignments = async (query, pageToken = null) => {
+  try {
+    let url = `/assignments/search?query=${encodeURIComponent(query)}&status=Active`;
+
+    if (pageToken) url += `&pageToken=${pageToken}`;
+
+    console.log("🔵 Search API URL:", url);
+
+    const res = await api.get(url);
+
+    console.log("🟢 Search API Response:", res.data);
+
+    return res.data;
+
+  } catch (err) {
+    console.error("❌ Error searching assignments:", err);
+    throw err;
+  }
+};

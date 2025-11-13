@@ -28,8 +28,8 @@ export default function EVList() {
 
     try {
       const url = pageToken
-        ? `${BASE_URL}/api/vehicles?status=Available&pageToken=${pageToken}`
-        : `${BASE_URL}/api/vehicles?status=Available`;
+        ? `${BASE_URL}/api/vehicles/admin?status=Available&pageToken=${pageToken}`
+        : `${BASE_URL}/api/vehicles/admin?status=Available`;
 
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${TOKEN}` },
@@ -60,7 +60,7 @@ export default function EVList() {
   const fetchVehicleCount = async () => {
     try {
       const res = await fetch(
-        `${BASE_URL}/api/vehicles/count?status=Available`,
+        `${BASE_URL}/api/vehicles/admin/count?status=Available`,
         {
           headers: { Authorization: `Bearer ${TOKEN}` },
         }
@@ -82,10 +82,10 @@ export default function EVList() {
 
     try {
       const url = pageToken
-        ? `${BASE_URL}/api/vehicles/search?query=${encodeURIComponent(
+        ? `${BASE_URL}/api/vehicles/admin/search?query=${encodeURIComponent(
             query
           )}&status=Available&pageToken=${pageToken}`
-        : `${BASE_URL}/api/vehicles/search?query=${encodeURIComponent(
+        : `${BASE_URL}/api/vehicles/admin/search?query=${encodeURIComponent(
             query
           )}&status=Available`;
 

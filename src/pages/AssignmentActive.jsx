@@ -17,7 +17,7 @@ import {
   Button,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import { fetchReturnedAssignments } from "../api/assignmentService";
+import { fetchReturnedAssignments, searchActiveAssignments } from "../api/assignmentService";
 import { useNavigate } from "react-router-dom";
 
 export default function AssignmentActive() {
@@ -30,6 +30,9 @@ export default function AssignmentActive() {
   const navigate = useNavigate();
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const [search, setSearch] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+
 
   const handleEditClick = (assignment) => {
     setSelectedAssignment(assignment);
@@ -39,6 +42,64 @@ export default function AssignmentActive() {
   const handleViewDetails = (assignment) => {
   navigate(`/home/assignmentsactive/detail/${assignment.id}`);
 };
+  const handleSearch = async (value) => {
+    const cleaned = cleanSearchKey(value);
+    setSearch(value); // keep raw value in UI input
+
+    if (!cleaned) {
+      // empty → reset
+      setIsSearching(false);
+      setPageData({ 1: [] });
+      setPageTokens({ 1: null });
+      setCurrentPage(1);
+      fetchAssignments(1);
+      return;
+    }
+
+    setIsSearching(true);
+    setPageData({ 1: [] });
+    setPageTokens({ 1: null });
+    setCurrentPage(1);
+
+    fetchSearchResults(1, cleaned);
+  };
+
+  const cleanSearchKey = (value) => {
+    return value.replace(/\s+/g, "").trim();
+  };
+
+  const fetchSearchResults = async (page = 1, query = search) => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      const pageToken = pageTokens[page] || "";
+
+      console.log("🔍 Searching:", { page, query, pageToken });
+
+      const res = await searchActiveAssignments(query, pageToken);
+
+      console.log("📦 Search API Response:", res);
+
+      if (res?.assignments) {
+        setPageData((prev) => ({ ...prev, [page]: res.assignments }));
+
+        if (res.nextPageToken) {
+          setPageTokens((prev) => ({
+            ...prev,
+            [page + 1]: res.nextPageToken,
+          }));
+
+          setPageCount((prev) => Math.max(prev, page + 1));
+        }
+      }
+
+    } catch (err) {
+      console.error("❌ Error searching:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   const fetchAssignments = async (page = 1) => {
@@ -83,7 +144,12 @@ export default function AssignmentActive() {
       if (scrollTop + clientHeight >= scrollHeight - 20 && !loading) {
         const nextPage = currentPage + 1;
         if (pageTokens[nextPage] && !pageData[nextPage]) {
-          fetchAssignments(nextPage);
+          // fetchAssignments(nextPage);
+          if (isSearching) {
+            fetchSearchResults(nextPage);
+          } else {
+            fetchAssignments(nextPage);
+          }
           setCurrentPage(nextPage);
         }
       }
@@ -93,10 +159,23 @@ export default function AssignmentActive() {
     return () => container.removeEventListener("scroll", handleScroll);
   }, [currentPage, pageTokens, pageData, loading]);
 
+  // const handlePageChange = (event, value) => {
+  //   setCurrentPage(value);
+  //   if (!pageData[value]) fetchAssignments(value);
+  // };
+
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
-    if (!pageData[value]) fetchAssignments(value);
+
+    if (!pageData[value]) {
+      if (isSearching) {
+        fetchSearchResults(value);
+      } else {
+        fetchAssignments(value);
+      }
+    }
   };
+
 
   const handleAssignClick = () => {
     navigate("/home/assignmentsactive/assignments");
@@ -130,27 +209,42 @@ export default function AssignmentActive() {
             Active Assignments
           </Typography>
 
-          <Button
+
+         <Button
             onClick={handleAssignClick}
             sx={{
               backgroundColor: "#1976d2",
               color: "#fff",
-              borderRadius: "8px",
+              borderRadius: "6px",
               px: 2,
-              py: 1,
-              width: 150,
-              fontSize: "20px",
+              py: "6px",        // smaller height
+              minWidth: "110px", // smaller width
+              fontSize: "14px",  // smaller text
+              fontWeight: 500,
               textTransform: "none",
               "&:hover": { backgroundColor: "#115293" },
             }}
           >
             + Assign
           </Button>
+
         </Box>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 2 }}>
+        <TextField
+          placeholder= "Search by Vehicle ID or Plate Number"
+          variant="outlined"
+          size="small"
+          sx={{ width: "50%" }}   // ⬅️ 50% WIDTH
+          value={search}
+          onChange={(e) => handleSearch(e.target.value)}
+        />
+      </Box>
 
         {/* Table */}
         <TableContainer sx={{ maxHeight: "60vh" }} ref={tableContainerRef}>
           <Table stickyHeader>
+
             <TableHead>
               <TableRow>
             
