@@ -7,6 +7,7 @@ import DepositStatus from "../components/DepositStatus";
 import { useLocation, useNavigate } from "react-router-dom";
 import { fetchAssignmentDetails } from "../api/assignmentService";
 import { useParams } from "react-router-dom";
+import DepositStatusReturn from "../components/DepositStatusReturn";
 export default function EVReturnDetailPage() {
   const [step, setStep] = useState(1);
   const [beforePhotos, setBeforePhotos] = useState([]);
@@ -161,9 +162,13 @@ export default function EVReturnDetailPage() {
         />
 
         <Box sx={{ mt: 1 }}>
-          <DepositStatus
+          <DepositStatusReturn
             isReturned={true}
-            depositAmountProp={assignmentData?.depositAmount}
+             depositAmount={assignmentData?.depositAmount}
+             depositAmountPaid={
+            (assignmentData?.depositAmountCashPaid || 0) +
+            (assignmentData?.depositAmountOnlinePaid || 0)
+          }
             returnedAmountProp={assignmentData?.depositAmountReturned}
             assignmentId={assignmentData?.id}
             notesProp={depositNotes}

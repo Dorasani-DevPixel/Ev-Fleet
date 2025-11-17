@@ -429,7 +429,7 @@ export default function RiderAssignment() {
           >
             <Button
               variant="contained"
-              onClick={() => navigate("/home/assignments")}
+              onClick={() => navigate("/home/assignmentsactive")}
               sx={{
                 bgcolor: "#002D72",
                 color: "#fff",

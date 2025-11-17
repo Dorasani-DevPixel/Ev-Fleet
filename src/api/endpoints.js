@@ -13,5 +13,5 @@ export const ENDPOINTS = {
   PERSONNEL_NAME: (id) => `/personnel/name/${id}`,
    ADD_PERSONNEL: "/personnel/addpersonnel",
    UPDATE_PERSONNEL: (id) => `/personnel/update/${id}`,
-
+   UNIQUE_POSITIONS: "/personnel/unique/positions",
 };

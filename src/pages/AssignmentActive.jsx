@@ -10,244 +10,137 @@ import {
   Paper,
   Chip,
   Typography,
-  Pagination,
-  Stack,
   TextField,
   CircularProgress,
   Button,
+  IconButton,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import { fetchReturnedAssignments, searchActiveAssignments } from "../api/assignmentService";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import { searchActiveAssignments } from "../api/assignmentService";
 import { useNavigate } from "react-router-dom";
 
 export default function AssignmentActive() {
+  const PAGE_SIZE = 100;
+
   const [pageData, setPageData] = useState({ 1: [] });
   const [pageTokens, setPageTokens] = useState({ 1: null });
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageCount, setPageCount] = useState(1);
+  const [currentCount, setCurrentCount] = useState(0); // always from API
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
   const tableContainerRef = useRef(null);
   const navigate = useNavigate();
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [selectedAssignment, setSelectedAssignment] = useState(null);
-  const [search, setSearch] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-
-
-  const handleEditClick = (assignment) => {
-    setSelectedAssignment(assignment);
-    setEditModalOpen(true);
-  };
 
   const handleViewDetails = (assignment) => {
-  navigate(`/home/assignmentsactive/detail/${assignment.id}`);
-};
-  const handleSearch = async (value) => {
-    const cleaned = cleanSearchKey(value);
-    setSearch(value); // keep raw value in UI input
-
-    if (!cleaned) {
-      // empty → reset
-      setIsSearching(false);
-      setPageData({ 1: [] });
-      setPageTokens({ 1: null });
-      setCurrentPage(1);
-      fetchAssignments(1);
-      return;
-    }
-
-    setIsSearching(true);
-    setPageData({ 1: [] });
-    setPageTokens({ 1: null });
-    setCurrentPage(1);
-
-    fetchSearchResults(1, cleaned);
+    navigate(`/home/assignmentsactive/detail/${assignment.id}`);
   };
 
-  const cleanSearchKey = (value) => {
-    return value.replace(/\s+/g, "").trim();
-  };
+  const cleanSearchKey = (value) => value.replace(/\s+/g, "").trim();
 
-  const fetchSearchResults = async (page = 1, query = search) => {
+  // Fetch assignments (search-aware)
+  const fetchAssignments = async (page = 1, query = search) => {
     if (loading) return;
     setLoading(true);
-
     try {
       const pageToken = pageTokens[page] || "";
-
-      console.log("🔍 Searching:", { page, query, pageToken });
-
       const res = await searchActiveAssignments(query, pageToken);
-
-      console.log("📦 Search API Response:", res);
 
       if (res?.assignments) {
         setPageData((prev) => ({ ...prev, [page]: res.assignments }));
 
         if (res.nextPageToken) {
-          setPageTokens((prev) => ({
-            ...prev,
-            [page + 1]: res.nextPageToken,
-          }));
+          setPageTokens((prev) => ({ ...prev, [page + 1]: res.nextPageToken }));
+        }
 
-          setPageCount((prev) => Math.max(prev, page + 1));
+        // Always take totalCount from API response
+        if (page === 1) {
+          setCurrentCount(res.totalCount ?? res.assignments.length);
         }
       }
-
     } catch (err) {
-      console.error("❌ Error searching:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSearch = (value) => {
+    const cleaned = cleanSearchKey(value);
+    setSearch(value);
+    setPageData({ 1: [] });
+    setPageTokens({ 1: null });
+    setCurrentPage(1);
 
-  const fetchAssignments = async (page = 1) => {
-    if (loading) return;
-    setLoading(true);
+    fetchAssignments(1, cleaned); // fetch with search or empty string
+  };
 
-    try {
-      const token = pageTokens[page] || "";
-      const res = await fetchReturnedAssignments(token);
+  const handleNext = () => {
+    const nextPage = currentPage + 1;
+    if (pageTokens[nextPage]) {
+      setCurrentPage(nextPage);
+      if (!pageData[nextPage]) fetchAssignments(nextPage, search);
+    }
+  };
 
-      if (res?.data?.assignments) {
-        const activeOnes = res.data.assignments.filter(
-          (a) => a.status === "Active" || !a.status
-        );
-
-        setPageData((prev) => ({ ...prev, [page]: activeOnes }));
-        if (res.data.nextPageToken) {
-          setPageTokens((prev) => ({
-            ...prev,
-            [page + 1]: res.data.nextPageToken,
-          }));
-          setPageCount((prev) => Math.max(prev, page + 1));
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching assignments:", err);
-    } finally {
-      setLoading(false);
+  const handlePrev = () => {
+    if (currentPage > 1) {
+      const prev = currentPage - 1;
+      setCurrentPage(prev);
+      if (!pageData[prev]) fetchAssignments(prev, search);
     }
   };
 
   useEffect(() => {
-    fetchAssignments(1);
+    fetchAssignments(1, ""); // always use search API with empty string for default
   }, []);
-
-  useEffect(() => {
-    const container = tableContainerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      if (scrollTop + clientHeight >= scrollHeight - 20 && !loading) {
-        const nextPage = currentPage + 1;
-        if (pageTokens[nextPage] && !pageData[nextPage]) {
-          // fetchAssignments(nextPage);
-          if (isSearching) {
-            fetchSearchResults(nextPage);
-          } else {
-            fetchAssignments(nextPage);
-          }
-          setCurrentPage(nextPage);
-        }
-      }
-    };
-
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, [currentPage, pageTokens, pageData, loading]);
-
-  // const handlePageChange = (event, value) => {
-  //   setCurrentPage(value);
-  //   if (!pageData[value]) fetchAssignments(value);
-  // };
-
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-
-    if (!pageData[value]) {
-      if (isSearching) {
-        fetchSearchResults(value);
-      } else {
-        fetchAssignments(value);
-      }
-    }
-  };
-
-
-  const handleAssignClick = () => {
-    navigate("/home/assignmentsactive/assignments");
-  };
 
   const paginatedRows = pageData[currentPage] || [];
 
   const formatDate = (timestamp) => {
     if (!timestamp?._seconds) return "—";
     const date = new Date(timestamp._seconds * 1000);
-    return date.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
   };
+
+  const start = (currentPage - 1) * PAGE_SIZE + 1;
+  const end = Math.min((currentPage - 1) * PAGE_SIZE + paginatedRows.length, currentCount);
 
   return (
     <Box sx={{ backgroundColor: "#f4f6f8" }}>
       <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
-        {/* Header */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 2,
-          }}
-        >
-          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-            Active Assignments
-          </Typography>
-
-
-         <Button
-            onClick={handleAssignClick}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: "bold" }}>Active Assignments</Typography>
+          <Button
+            onClick={() => navigate("/home/assignmentsactive/assignments")}
             sx={{
               backgroundColor: "#1976d2",
               color: "#fff",
               borderRadius: "6px",
-              px: 2,
-              py: "6px",        // smaller height
-              minWidth: "110px", // smaller width
-              fontSize: "14px",  // smaller text
-              fontWeight: 500,
+              px: 2, py: "6px", fontSize: "14px", fontWeight: 500,
               textTransform: "none",
-              "&:hover": { backgroundColor: "#115293" },
+              "&:hover": { backgroundColor: "#115293" }
             }}
           >
             + Assign
           </Button>
-
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 2 }}>
-        <TextField
-          placeholder= "Search by Vehicle ID or Plate Number"
-          variant="outlined"
-          size="small"
-          sx={{ width: "50%" }}   // ⬅️ 50% WIDTH
-          value={search}
-          onChange={(e) => handleSearch(e.target.value)}
-        />
-      </Box>
+          <TextField
+            placeholder="Search by Vehicle ID or Plate Number"
+            variant="outlined"
+            size="small"
+            sx={{ width: "50%" }}
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+        </Box>
 
-        {/* Table */}
-        <TableContainer sx={{ maxHeight: "60vh" }} ref={tableContainerRef}>
+        <TableContainer sx={{ maxHeight: "54vh", "& .MuiTableCell-root": { padding: 0 } }} ref={tableContainerRef}>
           <Table stickyHeader>
-
             <TableHead>
               <TableRow>
-            
                 <TableCell><b>Plate Number</b></TableCell>
                 <TableCell><b>Vehicle Model</b></TableCell>
                 <TableCell><b>Rider Name</b></TableCell>
@@ -258,13 +151,9 @@ export default function AssignmentActive() {
                 <TableCell><b>View</b></TableCell>
               </TableRow>
             </TableHead>
-
             <TableBody>
               {paginatedRows.map((a, idx) => (
                 <TableRow key={a.id || idx}>
-                  {/* ✅ Edit moved to first column */}
-               
-
                   <TableCell>{a.plateNumber || "—"}</TableCell>
                   <TableCell>{a.vehicleModel || "—"}</TableCell>
                   <TableCell>{a.riderName || "—"}</TableCell>
@@ -272,33 +161,18 @@ export default function AssignmentActive() {
                   <TableCell>{formatDate(a.assignmentDate)}</TableCell>
                   <TableCell>{a.depositAmountPaid ?? "—"}</TableCell>
                   <TableCell>
-                    <Chip
-                      label="Active"
-                      color="success"
-                      size="small"
-                      sx={{ fontWeight: "bold" }}
-                    />
+                    <Chip label="Active" color="success" size="small" sx={{ fontWeight: "bold" }} />
                   </TableCell>
                   <TableCell>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          textTransform: "none",
-                          borderRadius: "6px",
-                          color: "#1976d2",
-                          borderColor: "#1976d2",
-                          fontWeight: 500,
-                          "&:hover": {
-                            backgroundColor: "#1976d2",
-                            color: "#fff",
-                          },
-                        }}
-                         onClick={() => handleViewDetails(a)}
-                      >
-                        View Detail
-                      </Button>
-                    </TableCell>
+                    <Button
+                      size="small"
+                      variant="text"
+                      sx={{ color: "#1976d2" }}
+                      onClick={() => handleViewDetails(a)}
+                    >
+                      View Detail
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -311,44 +185,19 @@ export default function AssignmentActive() {
           </Box>
         )}
 
-        {/* Pagination Footer */}
-        <Box
-          sx={{
-            mt: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            px: 2,
-          }}
-        >
+        <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #ddd", pt: 1, px: 2 }}>
           <Typography variant="body2" sx={{ color: "gray" }}>
-            Page {currentPage} of {pageCount} — showing {paginatedRows.length} assignments
+            Showing {start}–{end} of {currentCount} assignments
           </Typography>
 
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <Pagination
-              count={pageCount}
-              page={currentPage}
-              onChange={handlePageChange}
-              shape="rounded"
-              siblingCount={1}
-              boundaryCount={1}
-              color="primary"
-            />
-            <Typography variant="body2" sx={{ color: "gray" }}>Go to:</Typography>
-            <TextField
-              size="small"
-              type="number"
-              value={currentPage}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                if (val >= 1 && val <= pageCount) setCurrentPage(val);
-                if (!pageData[val]) fetchAssignments(val);
-              }}
-              sx={{ width: 70 }}
-              inputProps={{ min: 1, max: pageCount }}
-            />
-          </Stack>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <IconButton onClick={handlePrev} disabled={currentPage === 1} sx={{ background: "#f2f2f2" }}>
+              <NavigateBeforeIcon />
+            </IconButton>
+            <IconButton onClick={handleNext} disabled={!pageTokens[currentPage + 1]} sx={{ background: "#f2f2f2" }}>
+              <NavigateNextIcon />
+            </IconButton>
+          </Box>
         </Box>
       </Paper>
     </Box>

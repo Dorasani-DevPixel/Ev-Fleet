@@ -15,7 +15,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import PersonnelEditSuccessModal from "./PersonnelEditSuccessModal";
 import { updatePersonnel, fetchSupervisorName } from "../api/personnelService";
 
-export default function EditPersonnelModal({ open, onClose, personnel }) {
+export default function EditPersonnelModal({ open, onClose, personnel,onUpdate }) {
   const [formData, setFormData] = useState(personnel || {});
   const [loading, setLoading] = useState(false);
   const [loadingSupervisor, setLoadingSupervisor] = useState(false);
@@ -56,25 +56,35 @@ export default function EditPersonnelModal({ open, onClose, personnel }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      const id = formData.id;
-     
-      const { supervisorName, ...payload } = formData;
+const handleSave = async () => {
+  setLoading(true);
+  try {
+    const id = formData.id;
+    const { supervisorName, ...payload } = formData;
 
-      const response = await updatePersonnel(id, payload);
+    const response = await updatePersonnel(id, payload);
 
-      setLoading(false);
-      setSuccessOpen(true);
-      onClose();
+    console.log("UPDATE RESPONSE:", response);
 
-      if (onSave) onSave(response);
-    } catch (error) {
-      console.error("❌ Error updating personnel:", error);
-      setLoading(false);
-    }
-  };
+    // Build final updated personnel to send back
+    const updatedPerson = {
+      ...formData,            // contains id + all fields
+      ...response.updatedFields // overwrite only changed fields
+    };
+
+    if (onUpdate) onUpdate(updatedPerson);
+
+    setSuccessOpen(true);
+    onClose();
+
+  } catch (error) {
+    console.error("❌ Error updating personnel:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   return (
     <>

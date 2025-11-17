@@ -13,7 +13,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
 import { addDeposit, createDepositNote } from "../api/assignmentService";
 
-export default function DepositStatus({
+export default function DepositStatusReturn({
   isReturned,
   depositAmountPaid,
   depositAmount,
@@ -105,66 +105,7 @@ export default function DepositStatus({
       </Box>
 
       {/* Add Deposit Amount */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          mb: 2,
-          alignItems: "center",
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
-          Add Deposit Amount
-        </Typography>
-        <IconButton onClick={() => setShowAdd(!showAdd)} size="small">
-          {showAdd ? <CloseIcon /> : <AddIcon />}
-        </IconButton>
-      </Box>
-
-      {showAdd && (
-        <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-          <TextField
-            size="small"
-            type="number"
-            placeholder="Enter amount"
-            value={newDeposit}
-            onChange={(e) => setNewDeposit(e.target.value)}
-            sx={{ width: "120px" }}
-          />
-          <Button variant="contained" color="primary" onClick={handleAddDeposit}>
-            Done
-          </Button>
-        </Box>
-      )}
-
-      {/* Notes Section */}
-      <Box>
-        {notes.map((note, index) => (
-          <Card
-            key={index}
-            variant="outlined"
-            sx={{
-              p: 1.5,
-              mb: 1.5,
-              borderRadius: 2,
-              backgroundColor: grey[200],
-            }}
-          >
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-               <Typography
-              variant="body2"
-              sx={{ mt: 0.5, color: "gray", fontSize: "0.85rem" }}
-            >
-              {note.text}
-            </Typography>
-              <Typography variant="caption" sx={{ color: "gray" }}>
-                {note.date}
-              </Typography>
-            </Box>
-           
-          </Card>
-        ))}
-      </Box>
+    
     </Paper>
   );
 }

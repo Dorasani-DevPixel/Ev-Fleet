@@ -88,3 +88,36 @@ export const updateVehicle = async (vehicleId, data) => {
     throw error;
   }
 };
+/**
+ * Fetch vehicles using filters and optional pagination
+ * @param {Object} params - Filter parameters
+ * @param {string} params.vehicleNumber
+ * @param {string} params.status
+ * @param {string} params.vendorName
+ * @param {string} params.location
+ * @param {string|null} params.pageToken
+ * @returns {Promise<Object>} API response data
+ */
+export const fetchVehiclesWithFilters = async ({
+  vehicleNumber = "",
+  status = "",
+  vendorName = "",
+  location = "",
+  pageToken = null,
+}) => {
+  try {
+    const body = {
+      vehicleNumber: vehicleNumber.replace(/\s+/g, ""),
+      status,
+      vendorName,
+      location,
+      pageToken,
+    };
+
+    const response = await api.post(`${ENDPOINTS.VEHICLES}/filter`, body);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching vehicles with filters:", error);
+    throw error;
+  }
+};

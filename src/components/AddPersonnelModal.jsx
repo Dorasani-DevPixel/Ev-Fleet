@@ -222,7 +222,7 @@ Phone: ${person.phone}`;
               select
               label="Status"
               name="Status"
-              value={form.position}
+              value={form.personnelStatuses}
               onChange={handleChange}
               variant="outlined"
               placeholder="Select Position"

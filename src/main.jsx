@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import App from "./App.jsx";
 import { GlobalStyles } from "@mui/material";
-
+import Login from "./pages/Login.jsx";
 import Home from "./pages/Home.jsx";
 import RiderAssignment from "./pages/RiderAssignment.jsx";
 import ReturnEv from "./pages/ReturnEv.jsx";
@@ -27,6 +27,7 @@ createRoot(document.getElementById("root")).render(
         }}
       />
       <Routes>
+        <Route path="/login" element={<Login/>}/>
         <Route path="/" element={<Home />} />
 
         {/* Parent route */}

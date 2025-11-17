@@ -80,7 +80,7 @@ export default function ReturnEv() {
 
   const handleCloseModal = () => {
     setOpenModal(false);
-    navigate("home/assignmentscompleted");
+    navigate("/home/assignmentscompleted");
   };
 
   return (

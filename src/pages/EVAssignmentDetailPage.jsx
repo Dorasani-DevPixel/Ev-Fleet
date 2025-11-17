@@ -143,7 +143,8 @@ export default function EVAssignmentDetailPage() {
         <Box sx={{ mt: 1 }}>
           <DepositStatus
             isReturned={false}
-             depositAmountProp={
+            depositAmount={assignmentData?.depositAmount}
+             depositAmountPaid={
             (assignmentData?.depositAmountCashPaid || 0) +
             (assignmentData?.depositAmountOnlinePaid || 0)
           }

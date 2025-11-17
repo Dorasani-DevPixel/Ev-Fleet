@@ -11,6 +11,10 @@ export const fetchActiveCount = async () => {
   const response = await api.get(`${ENDPOINTS.ASSIGNMENT_COUNT}?status=Active`);
   return response.data;
 };
+export const fetchCompleteCount = async () => {
+  const response = await api.get(`${ENDPOINTS.ASSIGNMENT_COUNT}?status=Completed`);
+  return response.data;
+};
 export const searchAssignments = async (query, status = "Active") => {
   try {
     const res = await api.get(
@@ -123,5 +127,58 @@ export const searchActiveAssignments = async (query, pageToken = null) => {
   } catch (err) {
     console.error("❌ Error searching assignments:", err);
     throw err;
+  }
+};
+export const searchCompletedAssignments = async (query, pageToken = null) => {
+  try {
+    let url = `/assignments/search?query=${encodeURIComponent(query)}&status=Completed`;
+
+    if (pageToken) url += `&pageToken=${pageToken}`;
+
+    console.log("🔵 Search API URL:", url);
+
+    const res = await api.get(url);
+
+    console.log("🟢 Search API Response:", res.data);
+
+    return res.data;
+
+  } catch (err) {
+    console.error("❌ Error searching assignments:", err);
+    throw err;
+  }
+};
+// Add this to your API service file
+
+/**
+ * Add deposit amount (cash paid) to an assignment
+ * @param {string} assignmentId - ID of the assignment
+ * @param {number} depositAmount - Amount to add
+ * @returns {Promise<Object>} - API response
+ */
+export const addDeposit = async (assignmentId, depositAmount) => {
+  if (!depositAmount || Number(depositAmount) <= 0) {
+    throw new Error("Invalid deposit amount");
+  }
+
+  try {
+    const url = `${ENDPOINTS.ASSIGNMENTS1}/${assignmentId}/update-cash-paid`;
+
+    console.log("PUT URL:", url);
+    console.log("Request body:", { amount: Number(depositAmount) });
+
+    const response = await api.put(
+      url,
+      { amount: Number(depositAmount) }, // sends { "amount": 500 }
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    console.log("✅ Deposit amount updated successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Failed to add deposit amount:", error);
+    throw error;
   }
 };

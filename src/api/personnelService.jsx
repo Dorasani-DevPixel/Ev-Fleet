@@ -70,7 +70,7 @@ export const searchPersonnel = async (query, position, pageToken = null) => {
 
     // Call API
     const response = await api.get(url);
-
+  console.log("response2",response);
     // Return response data
     return response.data;
   } catch (error) {
@@ -78,3 +78,33 @@ export const searchPersonnel = async (query, position, pageToken = null) => {
     throw error;
   }
 };
+// Fetch Unique Positions
+export const fetchUniquePositions = async () => {
+  try {
+    const response = await api.get(ENDPOINTS.UNIQUE_POSITIONS);
+    // Assuming API returns { positions: [...] }
+    console.log("response",response);
+    return response.data.positions || [];
+  } catch (error) {
+    console.error("Error fetching unique positions:", error);
+    return []; // fallback to empty array
+  }
+};
+// Fetch personnel count by position
+// Fetch personnel count by position using API client
+export const fetchPersonnelCount = async (position = "All") => {
+  try {
+    const params = {};
+    if (position && position !== "All") params.position = position;
+
+    const response = await api.get("/personnel/count", { params });
+    // Assuming API returns { count: number }
+    console.log("response1",response);
+    return response.data.total || 0;
+  } catch (error) {
+    console.error("Error fetching personnel count:", error);
+    return 0;
+  }
+};
+
+
