@@ -24,6 +24,8 @@ export default function ReturnEv() {
   const [notes, setNotes] = useState("");
   const [notes1, setNotes1] = useState("");
   const [notes2, setNotes2] = useState("");
+  const [vehicleStatus, setVehicleStatus] = useState("");
+  const [returnCompleting, setReturnCompleting] = useState(false);
 
   const handleNext = async () => {
     if (step === 1) {
@@ -49,6 +51,7 @@ export default function ReturnEv() {
       }
     } else if (step === 3) {
       try {
+        setReturnCompleting(true);
         const returnedFiles =
           JSON.parse(localStorage.getItem("returnedFiles")) || [];
 
@@ -58,24 +61,26 @@ export default function ReturnEv() {
           notes1,
           notes2,
           notes3: notes,
+          vehicleStatus: vehicleStatus,
         });
         console.log("Assignment updated successfully:", response.data);
         setOpenModal(true);
       } catch (error) {
         console.error("Update error:", error);
         alert("Failed to update assignment. Please try again.");
+      } finally {
+        setReturnCompleting(false); // 🔥 stop spinner
       }
     }
   };
 
   const handleBack = () => setStep((prev) => (prev > 1 ? prev - 1 : prev));
   const isNextDisabled =
-    (step === 2 && photoCount < 1) ||
-    (step === 3 && (!amountPaid || Number(amountPaid) <= 0));
+    (step === 2 && photoCount < 1) || (step === 3 && !vehicleStatus);
 
   const handleCloseModal = () => {
     setOpenModal(false);
-    navigate("/home/return-ev");
+    navigate("home/assignmentscompleted");
   };
 
   return (
@@ -98,7 +103,6 @@ export default function ReturnEv() {
           bgcolor: "white",
           zIndex: 1000,
           boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-         
         }}
       >
         <ProgressWithStops
@@ -145,6 +149,8 @@ export default function ReturnEv() {
             notes={notes}
             setNotes={setNotes}
             depositAmount={depositAmount}
+            vehicleStatus={vehicleStatus}
+            setVehicleStatus={setVehicleStatus}
           />
         )}
       </Box>
@@ -214,6 +220,28 @@ export default function ReturnEv() {
           <div className="spinner" />
           <Typography sx={{ mt: 2, color: "#002D72", fontWeight: 600 }}>
             Uploading photos... please wait
+          </Typography>
+        </Box>
+      )}
+      {returnCompleting && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(255,255,255,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 3000,
+            flexDirection: "column",
+          }}
+        >
+          <div className="spinner" />
+          <Typography sx={{ mt: 2, color: "#002D72", fontWeight: 600 }}>
+            Completing return... please wait
           </Typography>
         </Box>
       )}

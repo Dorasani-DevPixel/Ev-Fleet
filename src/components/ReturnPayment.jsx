@@ -1,9 +1,22 @@
 import React, { useState } from "react";
-import { Box, Typography, TextField } from "@mui/material";
+import {
+  Box,
+  Typography,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+} from "@mui/material";
 
-export default function ReturnPayment({ amountPaid, setAmountPaid,notes,setNotes,depositAmount }) {
- 
-
+export default function ReturnPayment({
+  amountPaid,
+  setAmountPaid,
+  notes,
+  setNotes,
+  depositAmount,
+  vehicleStatus,
+  setVehicleStatus,
+}) {
   return (
     <Box
       sx={{
@@ -15,6 +28,44 @@ export default function ReturnPayment({ amountPaid, setAmountPaid,notes,setNotes
         p: 2,
       }}
     >
+      {/* ✅ Vehicle Status Dropdown */}
+      <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
+        Vehicle Status
+      </Typography>
+
+      <FormControl fullWidth sx={{ mb: 3 }}>
+        <Select
+          value={vehicleStatus}
+          onChange={(e) => setVehicleStatus(e.target.value)}
+          displayEmpty
+          sx={{
+            borderRadius: "12px",
+            height: 45,
+            fontWeight: 500,
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#d3d3d3",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#999",
+            },
+            "& .MuiSelect-select": {
+              display: "flex",
+              alignItems: "center",
+            },
+          }}
+        >
+          <MenuItem value="" disabled>
+            Select Vehicle Status
+          </MenuItem>
+          <MenuItem value="Idle" sx={{ color: "green", fontWeight: 600 }}>
+            Is in good condition
+          </MenuItem>
+          <MenuItem value="Repair" sx={{ color: "#b38b00", fontWeight: 600 }}>
+            Needs Repair
+          </MenuItem>
+        </Select>
+      </FormControl>
+
       <Typography variant="h6" fontWeight="bold">
         Total Deposit: {depositAmount}
       </Typography>

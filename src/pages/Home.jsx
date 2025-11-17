@@ -10,12 +10,12 @@ export default function Home() {
   const tabs = [
     { label: "Vehicles", path: "vehicles" },
     { label: "Assignments", path: "assignmentsactive" },
-    { label: "Return EV", path: "return-ev" },
+    { label: "Returns", path: "assignmentscompleted" },
     { label: "Personnel", path: "personnel" },
   ];
 
   // Detect active tab from current path
-  const activeTab = tabs.findIndex(tab =>
+  const activeTab = tabs.findIndex((tab) =>
     location.pathname.includes(tab.path)
   );
 
@@ -27,7 +27,7 @@ export default function Home() {
   }, [location.pathname, navigate]);
 
   return (
-    <Box sx={{  bgcolor: "#f9f9f9", Height: "100vh" }}>
+    <Box sx={{ bgcolor: "#f9f9f9", Height: "100vh" }}>
       <Box
         sx={{
           position: "sticky",

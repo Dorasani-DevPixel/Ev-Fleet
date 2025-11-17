@@ -7,6 +7,13 @@ import { ENDPOINTS } from "./endpoints";
  * @param {Array} photos - Array of photo objects (each containing a file)
  * @returns {Promise<Object>} - API response containing uploaded file URLs
  */
+
+export const fetchCompletedAssignments = async (pageToken = null) => {
+  const url = pageToken
+    ? `${ENDPOINTS.ASSIGNMENTS_COMPLETED}&pageToken=${pageToken}`
+    : ENDPOINTS.ASSIGNMENTS_COMPLETED;
+  return await api.get(url);
+};
 export const uploadReturnPhotos = async (photos) => {
   console.log("📸 Starting upload of return photos...");
 
@@ -40,9 +47,8 @@ export const uploadReturnPhotos = async (photos) => {
   }
 };
 
-export const updateAssignment = async (assignmentId, { transactionImages, amountPaid, returnNotes,depositNotes }) => {
+export const updateAssignment = async (assignmentId, { transactionImages, amountPaid, notes1, notes2, notes3, vehicleStatus }) => {
  
-  const safeReturnNotes = Array.isArray(returnNotes) && returnNotes.length ? returnNotes : [];
   const safeTransactionImages = Array.isArray(transactionImages)
     ? transactionImages.map((file, index) => ({
         fileName: file.fileName || `returnImage_${index + 1}`,
@@ -50,32 +56,42 @@ export const updateAssignment = async (assignmentId, { transactionImages, amount
         url: file.url || "",
       }))
     : [];
+    const returnNotes = [
+    {
+      content: notes1 || "",
+      type: "image",
+      phase: "deposit",
+    },
+    {
+      content: notes2 || "",
+      type: "image",
+      phase: "return",
+    },
+    {
+      content: notes3 || "",
+      type: "payment",
+      phase: "return",
+    },
+  ];
 
- 
   const payload = {
-    assignmentStatus: "Inactive",
-    depositNotes: depositNotes,
-    returnNotes: safeReturnNotes,
     transactionImages: safeTransactionImages,
     depositAmountReturned: Number(amountPaid) || 0,
-    returnDate: new Date().toISOString(),
-    type: "return",
+    returnNotes,
+    vehicleStatus: vehicleStatus,
   };
-
  
   const requestBody =  payload ;
-
-  console.log("🟢 Sending PUT request body:", JSON.stringify(requestBody, null, 2));
+  console.log("Sending PUT request body:", JSON.stringify(requestBody, null, 2));
 
   try {
     const response = await api.put(`/assignments/${assignmentId}/update`, requestBody, {
       headers: { "Content-Type": "application/json" },
     });
-    console.log("test",`/assignments/${assignmentId}/update`);
-    console.log("✅ Assignment updated:", response.data);
+    console.log("Assignment updated:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ Error updating assignment:", error.response?.data || error);
+    console.error("Error updating assignment:", error.response?.data || error);
     throw error;
   }
 };

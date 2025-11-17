@@ -1,5 +1,6 @@
 export const ENDPOINTS = {
   ASSIGNMENTS: "/assignments?status=Active",
+  ASSIGNMENTS_COMPLETED: "/assignments?status=Completed",
   UPLOAD_RETURN_PHOTOS: "/uploads/evImages",
   ASSIGNMENT_IMAGES: (assignmentId, type = "deposit") =>
     `/assignments/${assignmentId}/images/${type}`,

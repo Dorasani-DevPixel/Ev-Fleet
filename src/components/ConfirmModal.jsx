@@ -6,10 +6,9 @@ import { MdPerson } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 Modal.setAppElement("#root");
 
-
 export default function ConfirmAssignmentModal({ isOpen, onClose, ev }) {
   if (!ev) return null;
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   return (
     <Modal
       isOpen={isOpen}
@@ -29,7 +28,6 @@ export default function ConfirmAssignmentModal({ isOpen, onClose, ev }) {
           </div>
         </div>
 
-
         {/* Rider Info */}
         <div className="modal-row">
           <div className="icon-circle lightblue">
@@ -41,11 +39,25 @@ export default function ConfirmAssignmentModal({ isOpen, onClose, ev }) {
           </div>
         </div>
 
-
         {/* Buttons */}
         <div className="modal-actions">
-          <button className="confirm-btn" onClick={() => { console.log("Assignment ID:", ev.id);
-      console.log("Full EV object:", ev);navigate("/home/return-ev/evreturn", { state: { assignmentId: ev.id, vehicleId: ev.plate,vehicleModel:ev.vehicleModel,riderName:ev.riderName,depositAmount:ev.depositAmount } })} }>Confirm</button>
+          <button
+            className="confirm-btn"
+            onClick={() => {
+              console.log("Assignment ID:", ev.id);
+              navigate("/home/returns/returnvehicle", {
+                state: {
+                  assignmentId: ev.id,
+                  vehicleId: ev.plate,
+                  vehicleModel: ev.vehicleModel,
+                  riderName: ev.riderName,
+                  depositAmount: ev.depositAmount,
+                },
+              });
+            }}
+          >
+            Confirm
+          </button>
           <button className="cancel-btn" onClick={onClose}>
             Cancel
           </button>
@@ -54,6 +66,3 @@ export default function ConfirmAssignmentModal({ isOpen, onClose, ev }) {
     </Modal>
   );
 }
-
-
-

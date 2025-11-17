@@ -15,6 +15,8 @@ import ReturnEVList from "./pages/ReturnEVList.jsx";
 import PersonnelTable from "./pages/PersonnelTable.jsx";
 import AssignmentActive from "./pages/AssignmentActive.jsx";
 import EVAssignmentDetailPage from "./pages/EVAssignmentDetailPage.jsx";
+import EVReturnDetailPage from "./pages/EVReturnDetailPage.jsx";
+import AssignmentsCompleted from "./pages/AssignmentsCompleted.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
@@ -30,16 +32,33 @@ createRoot(document.getElementById("root")).render(
         {/* Parent route */}
         <Route path="/home" element={<Home />}>
           <Route path="vehicles" element={<VehicleTable />} />
-          <Route path="assignmentsactive" element={<AssignmentActive/>}/>
-            <Route path="assignmentsactive/assignments" element={<EVList />} />
-           <Route path="assignmentsactive/detail/:id" element={<EVAssignmentDetailPage />}/>
+          <Route path="assignmentsactive" element={<AssignmentActive />} />
+          <Route
+            path="assignmentscompleted"
+            element={<AssignmentsCompleted />}
+          />
+          <Route path="assignmentsactive/assignments" element={<EVList />} />
+          <Route
+            path="assignmentscompleted/returns"
+            element={<ReturnEVList />}
+          />
+          <Route
+            path="assignmentsactive/detail/:id"
+            element={<EVAssignmentDetailPage />}
+          />
 
-          <Route path="assignments/riderAssignment" element={<RiderAssignment />} />
-          <Route path="return-ev" element={<ReturnEVList />} />
-            <Route path="return-ev/evreturn" element={<ReturnEv />} />
+          <Route
+            path="assignmentscompleted/detail/:id"
+            element={<EVReturnDetailPage />}
+          />
+
+          <Route
+            path="assignments/riderAssignment"
+            element={<RiderAssignment />}
+          />
+          <Route path="returns/returnvehicle" element={<ReturnEv />} />
           <Route path="personnel" element={<PersonnelTable />} />
         </Route>
-      
       </Routes>
     </BrowserRouter>
   </StrictMode>

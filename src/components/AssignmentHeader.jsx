@@ -20,10 +20,8 @@ function AssignmentHeader({
   const handleBack = () => {
     if (step > 1) {
       setStep((prev) => prev - 1);
-      console.log("Im here 1");
     } else {
-      console.log("Im here");
-      navigate("/home/assignments"); 
+      navigate(-1);
     }
   };
 

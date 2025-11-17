@@ -15,7 +15,7 @@ function NextButton({
   if (step === 3 && !paymentReceivedNow) {
     buttonLabel = "Online Payment";
   } else if (step === 3 && paymentReceivedNow) {
-    buttonLabel = "Payment Complete";
+    buttonLabel = "Complete Return";
   }
 
   const showAlternate = mode === "assignment" && step === 3; // 👈 only for RiderAssignment
@@ -44,7 +44,7 @@ function NextButton({
             variant="contained"
             fullWidth
             disabled={disabled}
-            startIcon={<QrCode2Icon />}
+            startIcon={mode === "assignment" ? <QrCode2Icon /> : null}
             onClick={!disabled ? onNext : undefined}
             sx={{
               bgcolor: disabled ? "grey.400" : "#002D72",

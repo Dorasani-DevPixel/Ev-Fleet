@@ -8,7 +8,6 @@ import {
 } from "../api/assignmentService";
 import { CircularProgress, Box } from "@mui/material";
 import "./ReturnEVList.css";
-import { MdAppBlocking } from "react-icons/md";
 
 export default function ReturnEVList() {
   const [search, setSearch] = useState("");
@@ -19,11 +18,17 @@ export default function ReturnEVList() {
   const [nextPageToken, setNextPageToken] = useState(null);
   const [totalCount, setTotalCount] = useState(null);
   const [searchCount, setSearchCount] = useState(null);
-  const [searching, setSearching] = useState(false);
 
   const scrollContainerRef = useRef(null);
 
+  const isFetchingRef = useRef(false);
+  const debounceTimer = useRef(null);
+  const activeRequestId = useRef(0);
+
   const getAssignments = async (pageToken = null, append = false) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+
     try {
       const res = await fetchReturnedAssignments(pageToken);
       const data = res.data;
@@ -44,16 +49,13 @@ export default function ReturnEVList() {
       setNextPageToken(data.nextPageToken || null);
 
       setEvList((prev) => {
-        const combined = append ? [...prev, ...mapped] : mapped;
-        const unique = Array.from(
-          new Map(combined.map((item) => [item.id, item])).values()
-        );
-        return unique;
+        const all = append ? [...prev, ...mapped] : mapped;
+        return Array.from(new Map(all.map((v) => [v.id, v])).values());
       });
     } catch (err) {
-      console.error("Error fetching assignments:", err);
       setError(err.message);
     } finally {
+      isFetchingRef.current = false;
       setLoading(false);
       setLoadingMore(false);
     }
@@ -64,17 +66,63 @@ export default function ReturnEVList() {
       const res = await fetchActiveCount();
       setTotalCount(res.totalCount);
     } catch (err) {
-      console.error("Error fetching active count:", err);
+      console.error("Error:", err);
     }
   };
 
-  // ✅ Initial load
+  const doSearchAssignments = async (
+    query,
+    pageToken = null,
+    append = false
+  ) => {
+    if (isFetchingRef.current) return;
+
+    const reqId = ++activeRequestId.current;
+    isFetchingRef.current = true;
+
+    try {
+      const data = await searchAssignments(query, "Active", pageToken);
+
+      const assignments = Array.isArray(data) ? data : data.assignments || [];
+
+      const mapped = assignments.map((a) => ({
+        id: a.id,
+        plate: a.plateNumber,
+        vehicleId: a.vehicleId,
+        vehicleModel: a.vehicleModel,
+        riderId: a.riderId,
+        riderName: a.riderName,
+        riderPhone: a.riderPhone,
+        status: a.assignmentStatus,
+        depositAmount: a.depositAmount,
+      }));
+
+      if (reqId === activeRequestId.current) {
+        setEvList((prev) => {
+          if (!append) return mapped;
+
+          const all = [...prev, ...mapped];
+          return Array.from(new Map(all.map((v) => [v.id, v])).values());
+        });
+
+        if (!append && data.totalCount !== undefined) {
+          setSearchCount(data.totalCount);
+        }
+        setNextPageToken(data.nextPageToken || null);
+      }
+    } catch (err) {
+      if (reqId === activeRequestId.current) setSearchCount(0);
+    } finally {
+      isFetchingRef.current = false;
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
   useEffect(() => {
     getAssignments();
     getActiveCount();
   }, []);
-
-  // ✅ Infinite scroll for assignment list
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -82,76 +130,51 @@ export default function ReturnEVList() {
     const handleScroll = () => {
       const bottomReached =
         container.scrollTop + container.clientHeight >=
-        container.scrollHeight - 10;
+        container.scrollHeight - 50;
 
-      if (bottomReached && nextPageToken && !loadingMore) {
+      if (
+        bottomReached &&
+        nextPageToken &&
+        !loadingMore &&
+        !isFetchingRef.current
+      ) {
         setLoadingMore(true);
-        getAssignments(nextPageToken, true);
+
+        if (search.trim()) {
+          doSearchAssignments(search.trim(), nextPageToken, true);
+        } else {
+          getAssignments(nextPageToken, true);
+        }
       }
     };
 
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [nextPageToken, loadingMore]);
+  }, [nextPageToken, loadingMore, search]);
 
   useEffect(() => {
-    const fetchSearchResults = async () => {
-      if (!search.trim()) {
+    clearTimeout(debounceTimer.current);
+
+    debounceTimer.current = setTimeout(() => {
+      const query = search.trim();
+      setEvList([]);
+      setNextPageToken(null);
+
+      if (query === "") {
         setSearchCount(null);
         getAssignments();
         getActiveCount();
-        return;
+      } else {
+        setLoading(true);
+        doSearchAssignments(query);
       }
+    }, 500);
 
-      setSearching(true);
-      try {
-        const data = await searchAssignments(search.trim(), "Active");
-
-        const assignments = Array.isArray(data) ? data : data.assignments || [];
-
-        const mapped = assignments.map((a) => ({
-          id: a.id,
-          plate: a.plateNumber,
-          vehicleId: a.vehicleId,
-          vehicleModel: a.vehicleModel,
-          riderId: a.riderId,
-          riderName: a.riderName,
-          riderPhone: a.riderPhone,
-          status: a.assignmentStatus,
-          depositAmount: a.depositAmount,
-        }));
-
-        setEvList(mapped);
-
-        // ✅ Use totalCount from API response if available
-        if (data.totalCount !== undefined) {
-          setSearchCount(data.totalCount);
-          console.log("Search result total count:", data.totalCount);
-        } else {
-          setSearchCount(mapped.length);
-        }
-      } catch (err) {
-        console.error("Error searching:", err);
-        setSearchCount(0);
-      } finally {
-        setSearching(false);
-      }
-    };
-
-    const debounce = setTimeout(fetchSearchResults, 500);
-    return () => clearTimeout(debounce);
+    return () => clearTimeout(debounceTimer.current);
   }, [search]);
-
-  // ✅ Client-side filter (optional - can be kept for instant local filter)
-  const filtered = evList.filter((ev) =>
-    ev.plate?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  console.log("Filtered EV list:", filtered);
 
   return (
     <div className="return-ev-list-page">
-      {/* Header + Search bar */}
       <div className="return-sticky-search-section">
         <h3 className="return-searchbar-heading">
           <strong>Unlink EV From Rider</strong>
@@ -168,37 +191,33 @@ export default function ReturnEVList() {
             </strong>
           </p>
         </h3>
+
         <SearchBar search={search} setSearch={setSearch} />
       </div>
 
-      {/* EV Cards container */}
       <div
-        className="return-ev-cards-scroll-container"
         ref={scrollContainerRef}
+        className="return-ev-cards-scroll-container"
         style={{ overflowY: "auto", maxHeight: "80vh" }}
       >
-        {/* Loader */}
         {loading && (
           <Box display="flex" justifyContent="center" alignItems="center" p={2}>
             <CircularProgress />
           </Box>
         )}
 
-        {/* Error message */}
         {error && <p style={{ color: "red" }}>Error: {error}</p>}
 
-        {/* EV cards list */}
         <div
           className={`return-all-ev-cards ${
-            filtered.length > 0 ? "has-cards" : ""
+            evList.length > 0 ? "has-cards" : ""
           }`}
         >
-          {filtered.map((ev) => (
+          {evList.map((ev) => (
             <ReturnEVCard key={ev.id} ev={ev} />
           ))}
         </div>
 
-        {/* Loading more (pagination) */}
         {loadingMore && (
           <Box display="flex" justifyContent="center" alignItems="center" p={2}>
             <CircularProgress size={24} />

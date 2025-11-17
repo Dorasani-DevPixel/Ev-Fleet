@@ -7,14 +7,25 @@ import {
   TextField,
   Avatar,
   Modal,
+  Slide,
+  Paper,
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
-
-function UploadPhotosPage({ photos, setPhotos, onPhotoCountChange,setNotes2,notes2 }) {
-  
-  const [previewPhoto, setPreviewPhoto] = useState(null); 
-
+import evFront from "../assets/Front-View.png";
+import evRear from "../assets/Rear-View.png";
+import evRight from "../assets/Right-Side-View.png";
+import evLeft from "../assets/Left-Side-View.png";
+import evOdometer from "../assets/Odometer-Reading.png";
+function UploadPhotosPage({
+  photos,
+  setPhotos,
+  onPhotoCountChange,
+  setNotes2,
+  notes2,
+}) {
+  const [previewPhoto, setPreviewPhoto] = useState(null);
+  const [openGuide, setOpenGuide] = useState(false); //
   useEffect(() => {
     onPhotoCountChange(photos.length);
   }, [photos, onPhotoCountChange]);
@@ -54,7 +65,6 @@ function UploadPhotosPage({ photos, setPhotos, onPhotoCountChange,setNotes2,note
           Make sure the rider is present during this step
         </Typography>
 
-      
         <Box
           sx={{
             display: "flex",
@@ -72,12 +82,12 @@ function UploadPhotosPage({ photos, setPhotos, onPhotoCountChange,setNotes2,note
             <Typography
               component="span"
               sx={{ color: "primary.main", cursor: "pointer" }}
+              onClick={() => setOpenGuide(true)}
             >
               guide
             </Typography>
           </Typography>
 
-      
           <Typography
             variant="body2"
             sx={{
@@ -85,7 +95,7 @@ function UploadPhotosPage({ photos, setPhotos, onPhotoCountChange,setNotes2,note
               color: photos.length < 3 ? "error.main" : "success.main",
             }}
           >
-            {photos.length} 
+            {photos.length}
           </Typography>
         </Box>
 
@@ -115,7 +125,6 @@ function UploadPhotosPage({ photos, setPhotos, onPhotoCountChange,setNotes2,note
                 multiple
                 hidden
                 onChange={handleAddPhoto}
-               
               />
               <AddCircleOutlineIcon sx={{ fontSize: 48, color: "#1976d2" }} />
             </Box>
@@ -148,7 +157,7 @@ function UploadPhotosPage({ photos, setPhotos, onPhotoCountChange,setNotes2,note
                 <IconButton
                   size="small"
                   onClick={(e) => {
-                    e.stopPropagation(); 
+                    e.stopPropagation();
                     handleRemove(index);
                   }}
                   sx={{
@@ -218,6 +227,98 @@ function UploadPhotosPage({ photos, setPhotos, onPhotoCountChange,setNotes2,note
             <CloseIcon />
           </IconButton>
         </Box>
+      </Modal>
+      <Modal
+        open={openGuide}
+        onClose={() => setOpenGuide(false)}
+        sx={{
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "center",
+        }}
+      >
+        <Slide direction="up" in={openGuide} mountOnEnter unmountOnExit>
+          <Paper
+            elevation={6}
+            sx={{
+              width: "100%",
+              maxWidth: 600,
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+              p: 3,
+              pb: 4,
+              bgcolor: "#fff",
+              maxHeight: "75vh", // stops before top
+              overflowY: "auto",
+            }}
+          >
+            {/* Header */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                EV Photo Capture Guide
+              </Typography>
+              <IconButton onClick={() => setOpenGuide(false)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+
+            {/* Step List */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {[
+                { label: "Front View", img: evFront },
+                { label: "Rear View", img: evRear },
+                { label: "Right Side View", img: evRight },
+                { label: "Left Side View", img: evLeft },
+                { label: "Odometer Reading", img: evOdometer },
+                { label: "Other Damage Close-ups", img: null }, // 👈 no image
+              ].map((item, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    borderBottom: index < 5 ? "1px solid #eee" : "none",
+                    pb: 1,
+                    pt: 1,
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: 500,
+                      color: "#333",
+                    }}
+                  >
+                    {index + 1}. {item.label}
+                  </Typography>
+
+                  {/* show image only if present */}
+                  {item.img && (
+                    <Box
+                      component="img"
+                      src={item.img}
+                      alt={item.label}
+                      sx={{
+                        width: 80,
+                        height: 60,
+                        objectFit: "contain",
+                        borderRadius: 2,
+                      }}
+                    />
+                  )}
+                </Box>
+              ))}
+            </Box>
+          </Paper>
+        </Slide>
       </Modal>
     </Box>
   );

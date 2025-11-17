@@ -4,10 +4,9 @@ import AssignmentHeader from "../components/AssignmentHeader";
 import EVCondition from "../components/EVCondition";
 import RiderDetails from "../components/RiderDetails";
 import DepositStatus from "../components/DepositStatus";
-import Footer from "../components/Footer";
 import { useLocation, useNavigate } from "react-router-dom";
 import { fetchAssignmentDetails } from "../api/assignmentService";
-
+import { useParams } from "react-router-dom";
 export default function EVReturnDetailPage() {
   const [step, setStep] = useState(1);
   const [beforePhotos, setBeforePhotos] = useState([]);
@@ -19,54 +18,48 @@ export default function EVReturnDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const vehicle = location.state?.vehicle; // contains { id }
-
+  const { id } = useParams();
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        if (!vehicle?.id) {
-          console.warn("Missing assignment ID:", vehicle);
+        if (!id) {
+          console.warn("Missing assignment ID:");
           setLoading(false);
           return;
         }
 
-        console.log("Fetching return details for ID:", vehicle.id);
-        const data = await fetchAssignmentDetails(vehicle.id);
+        console.log("Fetching return details for ID:", id);
+        const data = await fetchAssignmentDetails(id);
 
         const assignment = data?.assignment || data;
         setAssignmentData(assignment);
 
-         const beforeImageNotes =
-        assignment?.notes
-          ?.filter(
-            (note) => note.type === "image" && note.phase === "deposit"
-          )
-          ?.sort((a, b) => a.sequence - b.sequence) || [];
-        
-      const afterImageNotes =
-        assignment?.notes
-        ?.filter(
-            (note) => note.type === "image" && note.phase === "return"
-          )
-          ?.sort((a, b) => a.sequence - b.sequence) || [];
+        const beforeImageNotes =
+          assignment?.notes
+            ?.filter(
+              (note) => note.type === "image" && note.phase === "deposit"
+            )
+            ?.sort((a, b) => a.sequence - b.sequence) || [];
 
-      console.log("🟢 Before Image Notes (Return Screen):", beforeImageNotes);
-      console.log("🟣 After Image Notes (Return Screen):", afterImageNotes);
+        const afterImageNotes =
+          assignment?.notes
+            ?.filter((note) => note.type === "image" && note.phase === "return")
+            ?.sort((a, b) => a.sequence - b.sequence) || [];
 
-       setBeforeImageNotes(beforeImageNotes); 
-       setAfterImageNotes(afterImageNotes);
+        setBeforeImageNotes(beforeImageNotes);
+        setAfterImageNotes(afterImageNotes);
         const before =
-        assignment?.transactionImages
-          ?.filter((img) => img.type === "deposit")
-          ?.map((img) => img.url) || [];
+          assignment?.transactionImages
+            ?.filter((img) => img.type === "deposit")
+            ?.map((img) => img.url) || [];
 
-      const after =
-        assignment?.transactionImages
-          ?.filter((img) => img.type === "return")
-          ?.map((img) => img.url) || [];
+        const after =
+          assignment?.transactionImages
+            ?.filter((img) => img.type === "return")
+            ?.map((img) => img.url) || [];
 
-      setBeforePhotos(before);
-      setAfterPhotos(after);
+        setBeforePhotos(before);
+        setAfterPhotos(after);
       } catch (error) {
         console.error("Error fetching assignment details:", error);
       } finally {
@@ -75,7 +68,7 @@ export default function EVReturnDetailPage() {
     };
 
     fetchDetails();
-  }, [vehicle]);
+  }, [id]);
 
   const handleNavigate = (page) => {
     if (page === "home") navigate("/Home");
@@ -84,7 +77,12 @@ export default function EVReturnDetailPage() {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
         <CircularProgress />
       </Box>
     );
@@ -92,8 +90,8 @@ export default function EVReturnDetailPage() {
 
   if (!assignmentData) {
     return (
-      <Box textAlign="center" mt={10}>¯
-        No return assignment details found.
+      <Box textAlign="center" mt={10}>
+        ¯ No return assignment details found.
       </Box>
     );
   }
@@ -102,11 +100,11 @@ export default function EVReturnDetailPage() {
   // const depositNotes =
   //   assignmentData?.notes?.filter((note) => note.type === "return") || [];
 
-   const depositNotes =
-      assignmentData?.notes
-        ?.filter((note) => note.type === "payment")
-        ?.sort((a, b) => a.sequence - b.sequence) || [];
-        
+  const depositNotes =
+    assignmentData?.notes
+      ?.filter((note) => note.type === "payment")
+      ?.sort((a, b) => a.sequence - b.sequence) || [];
+
   const beforeImages =
     assignmentData?.transactionImages
       ?.filter((img) => img.type === "deposit")
@@ -149,7 +147,9 @@ export default function EVReturnDetailPage() {
           riderNumber={assignmentData?.riderPhone || "N/A"}
           assignmentDate={
             assignmentData?.assignmentDate
-              ? new Date(assignmentData.assignmentDate).toLocaleDateString("en-IN")
+              ? new Date(assignmentData.assignmentDate).toLocaleDateString(
+                  "en-IN"
+                )
               : "N/A"
           }
           returnDate={
@@ -161,14 +161,13 @@ export default function EVReturnDetailPage() {
         />
 
         <Box sx={{ mt: 1 }}>
-        
           <DepositStatus
             isReturned={true}
             depositAmountProp={assignmentData?.depositAmount}
             returnedAmountProp={assignmentData?.depositAmountReturned}
-            assignmentId={assignmentData?.id} 
+            assignmentId={assignmentData?.id}
             notesProp={depositNotes}
-            phase="return" 
+            phase="return"
           />
         </Box>
 
@@ -183,7 +182,7 @@ export default function EVReturnDetailPage() {
             <EVCondition
               beforePhotos={beforePhotos}
               afterPhotos={afterPhotos}
-              assignmentId={vehicle.id}
+              assignmentId={assignmentData?.id}
               setBeforePhotos={setBeforePhotos}
               setAfterPhotos={setAfterPhotos}
               showBefore={true}
@@ -205,9 +204,7 @@ export default function EVReturnDetailPage() {
           boxShadow: "0 -2px 6px rgba(0,0,0,0.1)",
           zIndex: 100,
         }}
-      >
-        <Footer active="home" onNavigate={handleNavigate} />
-      </Box>
+      ></Box>
     </Box>
   );
 }
