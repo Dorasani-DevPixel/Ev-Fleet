@@ -191,7 +191,7 @@ export default function AssignmentsCompleted() {
         </Box>
 
         {/* TABLE */}
-        <TableContainer sx={{ maxHeight: "54vh", "& .MuiTableCell-root": { padding: 1 } }}>
+        <TableContainer sx={{ maxHeight: "54vh", "& .MuiTableCell-root": { padding: 0.5 } }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>

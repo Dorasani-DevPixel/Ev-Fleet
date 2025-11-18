@@ -4,20 +4,30 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { Typography, Avatar, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
 export default function NavigationTabs({ activeTab, onTabChange, user }) {
   const handleChange = (event, newValue) => {
     if (onTabChange) onTabChange(newValue);
   };
    const navigate = useNavigate();
-     const handleLogout = () => {
-    // Clear all user data
+   const handleLogout = async () => {
+  try {
+    // 🔥 Firebase logout (kills session)
+    await signOut(auth);
+    console.log("Firebase session cleared");
+
+    // 🗑 Clear stored user data
     localStorage.removeItem("userId");
     localStorage.removeItem("userName");
     localStorage.removeItem("authToken");
 
-    // Redirect to login
+    // 🔄 Redirect to login
     navigate("/login", { replace: true });
-  };
+  } catch (error) {
+    console.error("Error while logging out:", error);
+  }
+};
   return (
     <Box sx={{ width: "100%", mb: 2, borderBottom: "1px solid #e0e0e0" }}>
       {/* Header container */}

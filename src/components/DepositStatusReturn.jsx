@@ -85,24 +85,32 @@ export default function DepositStatusReturn({
       </Typography>
 
       {/* Standard Deposit */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-        <Typography variant="body2" color="text.secondary">
-          Standard Deposit
-        </Typography>
-        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-          ₹{depositAmount}
-        </Typography>
-      </Box>
+       {/* Standard Deposit */}
+<Box sx={{ display: "flex", mb: 1 }}>
+  <Box sx={{ width: "180px" }}>
+    <Typography variant="body2" color="text.secondary">
+      Standard Deposit
+    </Typography>
+  </Box>
 
-      {/* Deposit Amount Paid */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-        <Typography variant="body2" color="text.secondary">
-          Deposit Amount Paid
-        </Typography>
-        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-          ₹{depositAmountPaidState}
-        </Typography>
-      </Box>
+  <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+    ₹{depositAmount}
+  </Typography>
+</Box>
+
+{/* Deposit Amount Returned */}
+<Box sx={{ display: "flex", mb: 1 }}>
+  <Box sx={{ width: "180px" }}>
+    <Typography variant="body2" color="text.secondary">
+      Deposit Amount Returned
+    </Typography>
+  </Box>
+
+  <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+    ₹{returnedAmountProp}
+  </Typography>
+</Box>
+
 
       {/* Add Deposit Amount */}
     

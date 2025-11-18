@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import NavigationTabs from "./NavigationTabs";
@@ -14,19 +14,36 @@ export default function Home() {
     { label: "EV Assignment", path: "assignmentsactive" },
     { label: "EV Returns", path: "assignmentscompleted" },
   ];
+
+  const [activeTab, setActiveTab] = useState(0);
+
   const user = location.state || {
     userId: localStorage.getItem("userId"),
     userName: localStorage.getItem("userName"),
   };
-  // Detect active tab from path
-  const activeTab = tabs.findIndex((tab) => location.pathname.includes(tab.path));
 
-  // Redirect /home to first tab (Personnel)
+  // Detect active tab from URL
   useEffect(() => {
-    if (location.pathname === "/home") {
-      navigate(`/home/${tabs[0].path}`, { replace: true });
+    const path = location.pathname;
+
+    if (path.includes("/home/personnel")) {
+      setActiveTab(0);
+    } 
+    else if (path.includes("/home/vehicles")) {
+      setActiveTab(1);
+    } 
+    else if (path.includes("/home/assignmentsactive")) {
+      setActiveTab(2);
     }
-  }, [location.pathname, navigate, tabs]);
+    else if (path.includes("/home/assignmentscompleted")) {
+      setActiveTab(3);
+    }
+
+    // ⭐ Special rule: If inside riderAssignment → keep Assignment Tab active
+    if (path.includes("riderAssignment")) {
+      setActiveTab(2);
+    }
+  }, [location.pathname]);
 
   return (
     <Box sx={{ bgcolor: "#f9f9f9" }}>
@@ -40,14 +57,15 @@ export default function Home() {
           boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
         }}
       >
-          <NavigationTabs
-        activeTab={activeTab >= 0 ? activeTab : 0}
-        onTabChange={(index) => navigate(`/home/${tabs[index].path}`)}
-        user={user}
-      />
+        <NavigationTabs
+          activeTab={activeTab}
+          onTabChange={(index) => navigate(`/home/${tabs[index].path}`)}
+          user={user}
+        />
       </Box>
-  {/* Outlet content fills remaining space */}
-  <Box sx={{ mt: 2}}>
+
+      {/* Page Content */}
+      <Box sx={{ mt: 2 }}>
         <Outlet />
       </Box>
     </Box>

@@ -214,7 +214,7 @@ const handlePrev = async () => {
         </Box>
 
         {/* Table */}
-        <TableContainer sx={{ height: "55vh", overflow: "auto" }}>
+        <TableContainer sx={{ height: "55vh", overflow: "auto", "& .MuiTableCell-root": { padding: 0.3 } }}>
   <Table
     stickyHeader
     sx={{
@@ -223,7 +223,7 @@ const handlePrev = async () => {
         whiteSpace: "normal",
         overflow: "hidden",
         textOverflow: "ellipsis",
-        padding: 1, // uniform padding
+         // uniform padding
         textAlign: "center", // optional, center text
       },
     }}

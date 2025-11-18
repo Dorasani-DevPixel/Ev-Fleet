@@ -125,7 +125,7 @@ export default function AssignmentActive() {
         </Box>
 
         {/* Table */}
-        <TableContainer sx={{ maxHeight: "55vh", "& .MuiTableCell-root": { padding: 1 } }} ref={tableContainerRef}>
+        <TableContainer sx={{ maxHeight: "55vh", "& .MuiTableCell-root": { padding: 0.5 } }} ref={tableContainerRef}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
