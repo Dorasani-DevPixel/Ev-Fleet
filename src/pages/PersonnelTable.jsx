@@ -52,6 +52,7 @@ export default function PersonnelTable() {
   const [totalPersonnel, setTotalPersonnel] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [positionFilter, setPositionFilter] = useState("All");
+  const [forceReload, setForceReload] = useState(false);
 
   const [openModal, setOpenModal] = useState(false);
   const handleOpenModal = () => setOpenModal(true);
@@ -110,14 +111,22 @@ export default function PersonnelTable() {
     fetchPersonnel(1);
   }, []);
 
-  // ✅ Search + Filter debounce
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      fetchPersonnel(1);
-    }, 500);
+ 
 
-    return () => clearTimeout(delayDebounce);
-  }, [searchQuery, positionFilter]);
+
+ useEffect(() => {
+  if (forceReload) {
+    fetchPersonnel(1);
+    setCurrentPage(1);
+    setForceReload(false);
+    return; 
+  }
+
+  const delayDebounce = setTimeout(() => {
+    fetchPersonnel(1);
+  }, 500);
+  return () => clearTimeout(delayDebounce);
+}, [searchQuery, positionFilter, forceReload]);
 
   const handlePersonnelUpdate = (updatedPerson) => {
     setPageData((prev) => {
@@ -130,7 +139,16 @@ export default function PersonnelTable() {
       return newData;
     });
   };
+    const handleClearFilters = () => {
+  setSearchQuery("");
+  setPositionFilter("All");
 
+  // Run fetch in next event loop AFTER state updates
+  Promise.resolve().then(() => {
+    fetchPersonnel(1);
+    setCurrentPage(1);
+  });
+};
   const handleNext = async () => {
   const nextPage = currentPage + 1;
   if (nextPage <= pageCount) {
@@ -199,18 +217,15 @@ const handlePrev = async () => {
             ))}
           </TextField>
           <Button
-            variant="outlined"
-            color="secondary"
-            size="small"
-            sx={{ minWidth: 150, height: 40 }}
-            onClick={() => {
-              setSearchQuery("");
-              setPositionFilter("All");
-              fetchPersonnel(1); // Refetch all personnel
-            }}
-          >
-            Clear Filters
-          </Button>
+              variant="outlined"
+              color="secondary"
+              size="small"
+              sx={{ minWidth: 150, height: 40 }}
+                onClick={handleClearFilters}
+            >
+              Clear Filters
+            </Button>
+
         </Box>
 
         {/* Table */}

@@ -13,7 +13,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { updateVehicle } from "../api/vehicleService"; // ✅ import API function
 import VehicleEditSuccessModal from "./VehicleEditSuccessModal";
-export default function EditVehicleModal({ open, onClose, vehicle }) {
+export default function EditVehicleModal({ open, onClose, vehicle,onSave  }) {
   const [formData, setFormData] = useState(vehicle || {});
   console.log("data",formData);
   const [loading, setLoading] = useState(false);
@@ -58,6 +58,8 @@ export default function EditVehicleModal({ open, onClose, vehicle }) {
       const res = await updateVehicle(vehicleId, updatedData);
       console.log("✅ Vehicle updated:", res);
       setAddedVehicle(res.data);
+      if (onSave) onSave(updatedData);
+
        setVehicleSuccessOpen(true);     // Open the success modal
        onClose(); 
 

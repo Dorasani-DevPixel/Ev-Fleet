@@ -38,7 +38,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const checkResponse = await fetch(`${BASE_URL}/api/auth/check-user`, {
+      const checkResponse = await fetch(`${BASE_URL}/api/auth/admin/check-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

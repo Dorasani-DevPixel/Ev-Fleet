@@ -86,9 +86,20 @@ export default function VehicleTable() {
   };
 
   const handleEditSave = (updatedVehicle) => {
-    console.log("Updated Vehicle Data:", updatedVehicle);
-  };
+  setPageData((prev) => {
+    const updated = { ...prev };
 
+    Object.keys(updated).forEach((page) => {
+      updated[page] = updated[page].map((v) =>
+        v.plateNumber === updatedVehicle.plateNumber ? updatedVehicle : v
+      );
+    });
+
+    return updated;
+  });
+};
+
+  
   // ------------------ DEBOUNCE SEARCH ------------------
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -362,6 +373,7 @@ export default function VehicleTable() {
           onClose={() => setEditModalOpen(false)}
           vehicle={selectedVehicle}
           onSave={handleEditSave}
+          
         />
       </Paper>
     </Box>

@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonnelEditSuccessModal from "./PersonnelEditSuccessModal";
-import { updatePersonnel, fetchSupervisorName } from "../api/personnelService";
+import { updatePersonnel, fetchSupervisorName,  fetchUniquePositions } from "../api/personnelService";
 
 export default function EditPersonnelModal({ open, onClose, personnel,onUpdate }) {
   const [formData, setFormData] = useState(personnel || {});
@@ -21,12 +21,20 @@ export default function EditPersonnelModal({ open, onClose, personnel,onUpdate }
   const [loadingSupervisor, setLoadingSupervisor] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
     const personnelStatuses = ["Active", "Inactive", "On Leave", "Terminated"];
-  const positions = ["Rider", "Area Manager", "City Head", "Regional Leader"];
+  const [positions, setPositions] = useState([]);
  
 
-  useEffect(() => {
-    setFormData(personnel || {});
-  }, [personnel]);
+ useEffect(() => {
+  const getPositions = async () => {
+    const data = await fetchUniquePositions();
+    setPositions(data);
+  };
+  getPositions();
+}, []);
+
+useEffect(() => {
+  console.log("positions updated:", positions);
+}, [positions]);
 
   // 🧠 Fetch supervisor name when supervisorId changes (onBlur)
   const handleSupervisorBlur = async () => {
@@ -144,11 +152,9 @@ const handleSave = async () => {
               fullWidth
               InputProps={{ sx: { height: 40 } }}
             >
-              {positions.map((p) => (
-                <MenuItem key={p} value={p}>
-                  {p}
-                </MenuItem>
-              ))}
+             {positions.map((pos) => (
+                           <MenuItem key={pos} value={pos}>{pos}</MenuItem>
+                         ))}
             </TextField>
 
             {/* Employment Status */}
