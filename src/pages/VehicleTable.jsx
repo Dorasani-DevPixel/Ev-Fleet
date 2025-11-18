@@ -283,15 +283,16 @@ export default function VehicleTable() {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ width: "12.5%" }}><b>Vendor</b></TableCell>
-                <TableCell sx={{ width: "12.5%" }}><b>Vehicle Number</b></TableCell>
-                <TableCell sx={{ width: "12.5%" }}><b>Status</b></TableCell>
-                <TableCell sx={{ width: "12.5%" }}><b>Location</b></TableCell>
-                <TableCell sx={{ width: "12.5%" }}><b>Rental Rate</b></TableCell>
-                <TableCell sx={{ width: "12.5%" }}><b>Model</b></TableCell>
-                <TableCell sx={{ width: "12.5%" }}><b>Make</b></TableCell>
-                <TableCell sx={{ width: "12.5%" }}><b>Battery Type</b></TableCell>
-                <TableCell sx={{ width: "12.5%" }}><b>Edit</b></TableCell>
+                <TableCell sx={{ width: "12.3%" }}><b>Vendor</b></TableCell>
+                <TableCell sx={{ width: "12.3%" }}><b>Vehicle Number</b></TableCell>
+                <TableCell sx={{ width: "12.3%" }}><b>Status</b></TableCell>
+                 <TableCell sx={{ width: "12.3%" }}><b>Assignment Status</b></TableCell>
+                <TableCell sx={{ width: "12.3%" }}><b>Location</b></TableCell>
+                <TableCell sx={{ width: "12.3%" }}><b>Rental Rate</b></TableCell>
+                <TableCell sx={{ width: "12.3%" }}><b>Model</b></TableCell>
+                {/* <TableCell sx={{ width: "12.3%",padding:"0px" }}><b>Make</b></TableCell> */}
+                <TableCell sx={{ width: "12.3%" }}><b>Battery Type</b></TableCell>
+                <TableCell sx={{ width: "12.3%" }}><b>Edit</b></TableCell>
               </TableRow>
             </TableHead>
 
@@ -300,17 +301,29 @@ export default function VehicleTable() {
                 const status = getStatusColor(row.status);
                 return (
                   <TableRow key={row.id || idx}>
-                    <TableCell sx={{ width: "12.5%" }}>{row.vendorName || "N/A"}</TableCell>
-                    <TableCell sx={{ width: "12.5%" }}>{row.plateNumber || "N/A"}</TableCell>
-                    <TableCell sx={{ width: "12.5%" }}>
+                    <TableCell sx={{ width: "12.3%" }}>{row.vendorName || "N/A"}</TableCell>
+                    <TableCell sx={{ width: "12.3%" }}>{row.plateNumber || "N/A"}</TableCell>
+                    <TableCell sx={{ width: "12.3%" }}>
                       <Chip label={status.label} color={status.color} size="small" />
                     </TableCell>
-                    <TableCell sx={{ width: "12.5%" }}>{row.location || "N/A"}</TableCell>
-                    <TableCell sx={{ width: "12.5%" }}>₹{row.rentalRatePerDay || 0}</TableCell>
-                    <TableCell sx={{ width: "12.5%" }}>{row.model || "N/A"}</TableCell>
-                    <TableCell sx={{ width: "12.5%" }}>{row.type || "N/A"}</TableCell>
-                    <TableCell sx={{ width: "12.5%" }}>{row.batteryType || "N/A"}</TableCell>
-                    <TableCell sx={{ width: "12.5%" }} padding="none">
+                    <TableCell sx={{ width: "12.3%" }}>
+                      <Chip
+                        label={row.assignmentStatus || "N/A"}
+                        color={
+                          row.assignmentStatus === "Active" ? "success" :
+                          row.assignmentStatus === "Available" ? "secondary" :
+                          "default"
+                        }
+                        size="small"
+                      />
+                    </TableCell>
+
+                    <TableCell sx={{ width: "12.3%" }}>{row.location || "N/A"}</TableCell>
+                    <TableCell sx={{ width: "12.3%" }}>₹{row.rentalRatePerDay || 0}</TableCell>
+                    <TableCell sx={{ width: "12.3%" }}>{row.model || "N/A"}</TableCell>
+                    {/* <TableCell sx={{ width: "12.3%",padding:"0px" }}>{row.type || "N/A"}</TableCell> */}
+                    <TableCell sx={{ width: "12.3%" }}>{row.batteryType || "N/A"}</TableCell>
+                    <TableCell sx={{ width: "12.3%" }} padding="none">
                       <Button variant="text" sx={{ color: "#1976d2", textTransform: "none",p: 0, minWidth: 0  }} onClick={() => handleEditClick(row)}>Edit</Button>
                     </TableCell>
                   </TableRow>

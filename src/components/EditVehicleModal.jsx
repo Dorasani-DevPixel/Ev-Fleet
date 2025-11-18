@@ -114,6 +114,18 @@ export default function EditVehicleModal({ open, onClose, vehicle }) {
             InputProps={{ sx: { height: 40 } }}
           > {statuses.map((f) => <MenuItem key={f} value={f}>{f}</MenuItem>)} </TextField>
           <TextField
+            select
+            label="Assignment Status"
+            name="assignmentStatus"
+            value={formData.assignmentStatus || ""}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ sx: { height: 40 } }}
+          >
+            <MenuItem value="Active">Active</MenuItem>
+            <MenuItem value="Available">Available</MenuItem>
+          </TextField>
+          <TextField
             label="Location"
             name="location"
             value={formData.location || ""}

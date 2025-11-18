@@ -165,8 +165,21 @@ const handleSave = async () => {
                               {pos}
                             </MenuItem>
                           ))}
-                        </TextField>
+            </TextField>
             
+          {/* Assignment Status */}
+          <TextField
+            select
+            label="Assignment Status"
+            name="assignmentStatus"
+            value={formData.assignmentStatus || ""}
+            onChange={handleChange}
+            fullWidth
+            InputProps={{ sx: { height: 40 } }}
+          >
+            <MenuItem value="Active">Active</MenuItem>
+            <MenuItem value="Available">Available</MenuItem>
+          </TextField>
 
           
              

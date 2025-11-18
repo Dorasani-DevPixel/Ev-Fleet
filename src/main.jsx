@@ -28,7 +28,7 @@ createRoot(document.getElementById("root")).render(
       />
       <Routes>
         <Route path="/login" element={<Login/>}/>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Login />} />
 
         {/* Parent route */}
         <Route path="/home" element={<Home />}>
