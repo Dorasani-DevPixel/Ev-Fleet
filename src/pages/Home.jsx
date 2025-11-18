@@ -7,27 +7,30 @@ export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Tabs should match NavigationTabs order
   const tabs = [
-    { label: "Vehicles", path: "vehicles" },
-    { label: "Assignments", path: "assignmentsactive" },
-    { label: "Returns", path: "assignmentscompleted" },
     { label: "Personnel", path: "personnel" },
+    { label: "EV Vehicles", path: "vehicles" },
+    { label: "EV Assignment", path: "assignmentsactive" },
+    { label: "EV Returns", path: "assignmentscompleted" },
   ];
+  const user = location.state || {
+    userId: localStorage.getItem("userId"),
+    userName: localStorage.getItem("userName"),
+  };
+  // Detect active tab from path
+  const activeTab = tabs.findIndex((tab) => location.pathname.includes(tab.path));
 
-  // Detect active tab from current path
-  const activeTab = tabs.findIndex((tab) =>
-    location.pathname.includes(tab.path)
-  );
-
-  // Default route
+  // Redirect /home to first tab (Personnel)
   useEffect(() => {
     if (location.pathname === "/home") {
-      navigate("/home/vehicles");
+      navigate(`/home/${tabs[0].path}`, { replace: true });
     }
-  }, [location.pathname, navigate]);
+  }, [location.pathname, navigate, tabs]);
 
   return (
-    <Box sx={{ bgcolor: "#f9f9f9", Height: "100vh" }}>
+    <Box sx={{ bgcolor: "#f9f9f9" }}>
+      {/* Sticky Navigation */}
       <Box
         sx={{
           position: "sticky",
@@ -37,13 +40,14 @@ export default function Home() {
           boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
         }}
       >
-        <NavigationTabs
-          activeTab={activeTab}
-          onTabChange={(index) => navigate(`/home/${tabs[index].path}`)}
-        />
+          <NavigationTabs
+        activeTab={activeTab >= 0 ? activeTab : 0}
+        onTabChange={(index) => navigate(`/home/${tabs[index].path}`)}
+        user={user}
+      />
       </Box>
-
-      <Box sx={{ mt: 2 }}>
+  {/* Outlet content fills remaining space */}
+  <Box sx={{ mt: 2}}>
         <Outlet />
       </Box>
     </Box>

@@ -49,7 +49,7 @@ function AssignmentHeader({
         boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
         py: 1.2,
         position: "fixed",
-        top: 100,
+        top: 120,
         left: 0,
         zIndex: 1200,
         display: "flex",

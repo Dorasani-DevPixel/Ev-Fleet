@@ -97,7 +97,14 @@ export default function Login() {
       const token = await user.getIdToken();
       localStorage.setItem("authToken", token);
 
-      navigate("/home");
+     navigate("/home", {
+      state: {
+        userId: localStorage.getItem("userId"),
+        userName: localStorage.getItem("userName"),
+      },
+      replace: true,
+    });
+
     } catch (error) {
       console.error("OTP verification failed:", error);
 

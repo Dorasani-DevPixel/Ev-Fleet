@@ -172,18 +172,8 @@ export default function AssignmentsCompleted() {
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>Completed Assignments</Typography>
           <Button
             onClick={handleReturnNavigation}
-            sx={{
-              backgroundColor: "#1976d2",
-              color: "#fff",
-              borderRadius: "8px",
-              px: 2,
-              py: 1,
-              width: 150,
-              fontSize: "16px",
-              textTransform: "none",
-              "&:hover": { backgroundColor: "#115293" },
-            }}
-          >
+            sx={{ backgroundColor: "#1976d2", color: "#fff", borderRadius: "6px", px: 2, py: "6px", fontSize: "14px", fontWeight: 500, textTransform: "none", "&:hover": { backgroundColor: "#115293" } }} >
+         
             + Return
           </Button>
         </Box>
@@ -201,7 +191,7 @@ export default function AssignmentsCompleted() {
         </Box>
 
         {/* TABLE */}
-        <TableContainer sx={{ maxHeight: "54vh", "& .MuiTableCell-root": { padding: 0 } }}>
+        <TableContainer sx={{ maxHeight: "54vh", "& .MuiTableCell-root": { padding: 1 } }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -229,7 +219,7 @@ export default function AssignmentsCompleted() {
                     <Button
                       size="small"
                       variant="text"
-                      sx={{ color: "#1976d2" }}
+                      sx={{ color: "#1976d2",textTransform: "none", minWidth: 70  }}
                       onClick={() => handleViewDetails(a)}
                     >
                       View Detail

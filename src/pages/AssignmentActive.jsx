@@ -17,28 +17,23 @@ import {
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
-import { searchActiveAssignments } from "../api/assignmentService";
 import { useNavigate } from "react-router-dom";
+import { searchActiveAssignments } from "../api/assignmentService";
 
 export default function AssignmentActive() {
   const PAGE_SIZE = 100;
+  const navigate = useNavigate();
 
   const [pageData, setPageData] = useState({ 1: [] });
   const [pageTokens, setPageTokens] = useState({ 1: null });
   const [currentPage, setCurrentPage] = useState(1);
-  const [currentCount, setCurrentCount] = useState(0); // always from API
+  const [currentCount, setCurrentCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+
   const tableContainerRef = useRef(null);
-  const navigate = useNavigate();
 
-  const handleViewDetails = (assignment) => {
-    navigate(`/home/assignmentsactive/detail/${assignment.id}`);
-  };
-
-  const cleanSearchKey = (value) => value.replace(/\s+/g, "").trim();
-
-  // Fetch assignments (search-aware)
+  // ------------------ FETCH ASSIGNMENTS ------------------
   const fetchAssignments = async (page = 1, query = search) => {
     if (loading) return;
     setLoading(true);
@@ -48,39 +43,32 @@ export default function AssignmentActive() {
 
       if (res?.assignments) {
         setPageData((prev) => ({ ...prev, [page]: res.assignments }));
-
         if (res.nextPageToken) {
           setPageTokens((prev) => ({ ...prev, [page + 1]: res.nextPageToken }));
         }
-
-        // Always take totalCount from API response
-        if (page === 1) {
-          setCurrentCount(res.totalCount ?? res.assignments.length);
-        }
+        if (page === 1) setCurrentCount(res.totalCount ?? res.assignments.length);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching assignments:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  // ------------------ SEARCH HANDLER ------------------
   const handleSearch = (value) => {
-    const cleaned = cleanSearchKey(value);
     setSearch(value);
     setPageData({ 1: [] });
     setPageTokens({ 1: null });
     setCurrentPage(1);
-
-    fetchAssignments(1, cleaned); // fetch with search or empty string
+    fetchAssignments(1, value.trim());
   };
 
+  // ------------------ PAGINATION ------------------
   const handleNext = () => {
     const nextPage = currentPage + 1;
-    if (pageTokens[nextPage]) {
-      setCurrentPage(nextPage);
-      if (!pageData[nextPage]) fetchAssignments(nextPage, search);
-    }
+    setCurrentPage(nextPage);
+    if (!pageData[nextPage]) fetchAssignments(nextPage, search);
   };
 
   const handlePrev = () => {
@@ -91,12 +79,12 @@ export default function AssignmentActive() {
     }
   };
 
+  // ------------------ INITIAL LOAD ------------------
   useEffect(() => {
-    fetchAssignments(1, ""); // always use search API with empty string for default
+    fetchAssignments(1, "");
   }, []);
 
-  const paginatedRows = pageData[currentPage] || [];
-
+  // ------------------ FORMAT DATE ------------------
   const formatDate = (timestamp) => {
     if (!timestamp?._seconds) return "—";
     const date = new Date(timestamp._seconds * 1000);
@@ -104,51 +92,46 @@ export default function AssignmentActive() {
   };
 
   const start = (currentPage - 1) * PAGE_SIZE + 1;
-  const end = Math.min((currentPage - 1) * PAGE_SIZE + paginatedRows.length, currentCount);
+  const end = Math.min((currentPage - 1) * PAGE_SIZE + (pageData[currentPage]?.length || 0), currentCount);
+
+  const paginatedRows = pageData[currentPage] || [];
+
+  // ------------------ VIEW DETAIL ------------------
+  const handleViewDetails = (assignment) => {
+    navigate(`/home/assignmentsactive/detail/${assignment.id}`);
+  };
 
   return (
-    <Box sx={{ backgroundColor: "#f4f6f8" }}>
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
+    <Box sx={{ backgroundColor: "#f4f6f8", p: 1 }}>
+      <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+        {/* Header */}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>Active Assignments</Typography>
-          <Button
-            onClick={() => navigate("/home/assignmentsactive/assignments")}
-            sx={{
-              backgroundColor: "#1976d2",
-              color: "#fff",
-              borderRadius: "6px",
-              px: 2, py: "6px", fontSize: "14px", fontWeight: 500,
-              textTransform: "none",
-              "&:hover": { backgroundColor: "#115293" }
-            }}
-          >
-            + Assign
-          </Button>
+          <Button onClick={() => navigate("/home/assignmentsactive/assignments")} 
+          sx={{ backgroundColor: "#1976d2", color: "#fff", borderRadius: "6px", px: 2, py: "6px", fontSize: "14px", fontWeight: 500, textTransform: "none", "&:hover": { backgroundColor: "#115293" } }} >
+           + Assign </Button>
         </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 2 }}>
+        {/* Search */}
+        <Box sx={{ display: "flex", mb: 2 }}>
           <TextField
             placeholder="Search by Vehicle ID or Plate Number"
             variant="outlined"
             size="small"
-            sx={{ width: "50%" }}
+            sx={{ width: 300 }}
             value={search}
             onChange={(e) => handleSearch(e.target.value)}
           />
         </Box>
 
-        <TableContainer sx={{ maxHeight: "54vh", "& .MuiTableCell-root": { padding: 0 } }} ref={tableContainerRef}>
+        {/* Table */}
+        <TableContainer sx={{ maxHeight: "55vh", "& .MuiTableCell-root": { padding: 1 } }} ref={tableContainerRef}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell><b>Plate Number</b></TableCell>
-                <TableCell><b>Vehicle Model</b></TableCell>
-                <TableCell><b>Rider Name</b></TableCell>
-                <TableCell><b>Rider Phone</b></TableCell>
-                <TableCell><b>Assignment Date</b></TableCell>
-                <TableCell><b>Deposit Amount Paid</b></TableCell>
-                <TableCell><b>Status</b></TableCell>
-                <TableCell><b>View</b></TableCell>
+                {["Plate Number", "Vehicle Model", "Rider Name", "Rider Phone", "Assignment Date", "Deposit Paid", "Status", "View"].map((col) => (
+                  <TableCell key={col} sx={{ width: "12.5%" }}><b>{col}</b></TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -167,7 +150,7 @@ export default function AssignmentActive() {
                     <Button
                       size="small"
                       variant="text"
-                      sx={{ color: "#1976d2" }}
+                      sx={{ color: "#1976d2", textTransform: "none", minWidth: 70 }}
                       onClick={() => handleViewDetails(a)}
                     >
                       View Detail
@@ -185,11 +168,11 @@ export default function AssignmentActive() {
           </Box>
         )}
 
-        <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #ddd", pt: 1, px: 2 }}>
+        {/* Pagination */}
+        <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #ddd", pt: 1, px: 1 }}>
           <Typography variant="body2" sx={{ color: "gray" }}>
             Showing {start}–{end} of {currentCount} assignments
           </Typography>
-
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <IconButton onClick={handlePrev} disabled={currentPage === 1} sx={{ background: "#f2f2f2" }}>
               <NavigateBeforeIcon />

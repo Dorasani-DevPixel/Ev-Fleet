@@ -14,6 +14,7 @@ import {
   CircularProgress,
   Button,
   MenuItem,
+  IconButton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -73,36 +74,36 @@ export default function PersonnelTable() {
   }, []);
 
   // ✅ Fetch personnel data (first page or search)
-  const fetchPersonnel = async (page = 1) => {
-    if (loading) return;
-    setLoading(true);
+ const fetchPersonnel = async (page = 1) => {
+  if (loading) return;
+  setLoading(true);
 
-    try {
-      let response;
+  try {
+    let response;
 
-      // Search or filter applied
-      if (searchQuery.trim() || (positionFilter && positionFilter !== "All")) {
-        response = await searchPersonnel(searchQuery.trim(), positionFilter);
-      } else {
-        response = await searchPersonnel("", "")
-      }
-
-      const personnel = response?.personnel || [];
-      setPageData({ [page]: personnel });
-
-      // ✅ Update total personnel
-      if (response?.totalCount !== undefined) {
-        setTotalPersonnel(response.totalCount);
-      }
-
-      setPageCount(Math.ceil((response?.totalCount || personnel.length) / PAGE_SIZE));
-      setCurrentPage(1);
-    } catch (err) {
-      console.error("Error fetching personnel:", err);
-    } finally {
-      setLoading(false);
+    if (searchQuery.trim() || (positionFilter && positionFilter !== "All")) {
+      response = await searchPersonnel(searchQuery.trim(), positionFilter);
+    } else {
+      response = await searchPersonnel("", "");
     }
-  };
+
+    const personnel = response?.personnel || [];
+    setPageData((prev) => ({ ...prev, [page]: personnel }));
+
+    if (response?.totalCount !== undefined) {
+      setTotalPersonnel(response.totalCount);
+    }
+
+    setPageCount(Math.ceil((response?.totalCount || personnel.length) / PAGE_SIZE));
+    return personnel; // return data
+  } catch (err) {
+    console.error("Error fetching personnel:", err);
+    return [];
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // ✅ Initial fetch
   useEffect(() => {
@@ -130,16 +131,25 @@ export default function PersonnelTable() {
     });
   };
 
-  const handleNext = () => {
-    const nextPage = currentPage + 1;
-    if (nextPage <= pageCount) {
-      setCurrentPage(nextPage);
-    }
-  };
+  const handleNext = async () => {
+  const nextPage = currentPage + 1;
+  if (nextPage <= pageCount) {
+   
+    fetchPersonnel(nextPage);
+    setCurrentPage(nextPage);
+   
+  }
+};
 
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
+const handlePrev = async () => {
+  const prevPage = currentPage - 1;
+  if (prevPage >= 1) {
+
+    fetchPersonnel(prevPage);
+    setCurrentPage(prevPage);
+   
+  }
+};
 
   const paginatedRows = pageData[currentPage] || [];
 
@@ -173,7 +183,7 @@ export default function PersonnelTable() {
             placeholder="Search ID / Phone / Name"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ width: 1000 }}
+            sx={{ width: 400 }}
           />
           <TextField
             select
@@ -188,67 +198,105 @@ export default function PersonnelTable() {
               <MenuItem key={pos} value={pos}>{pos}</MenuItem>
             ))}
           </TextField>
+          <Button
+            variant="outlined"
+            color="secondary"
+            size="small"
+            sx={{ minWidth: 150, height: 40 }}
+            onClick={() => {
+              setSearchQuery("");
+              setPositionFilter("All");
+              fetchPersonnel(1); // Refetch all personnel
+            }}
+          >
+            Clear Filters
+          </Button>
         </Box>
 
         {/* Table */}
         <TableContainer sx={{ height: "55vh", overflow: "auto" }}>
-          <Table stickyHeader sx={{ "& th, & td": { whiteSpace: "normal" }, "& .MuiTableCell-root": { padding: 0 } }}>
-            <TableHead>
-              <TableRow>
-                <TableCell>Personnel Id</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Phone</TableCell>
-                <TableCell>Position</TableCell>
-                <TableCell>Employment Status</TableCell>
-                <TableCell>Supervisor ID</TableCell>
-                <TableCell>Assignment Status</TableCell>
-                <TableCell>Location</TableCell>
-               
-                <TableCell>Edit Data</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedRows.map((row, idx) => {
-                const employment = getStatusColor(row.employmentStatus);
-                const assignment = getStatusColor(row.assignmentStatus);
-                return (
-                  <TableRow key={row.id || idx}>
-                    <TableCell>{row.id || ""}</TableCell>
-                    <TableCell>{row.name || "N/A"}</TableCell>
-                    <TableCell>{row.phone || "N/A"}</TableCell>
-                    <TableCell>{row.position || "N/A"}</TableCell>
-                    <TableCell><Chip label={employment.label} color={employment.color} size="small" /></TableCell>
-                    <TableCell>{row.supervisorId || "N/A"}</TableCell>
-                    <TableCell><Chip label={assignment.label} color={assignment.color} size="small" /></TableCell>
-                    <TableCell>{row.location || "N/A"}</TableCell>
-                   
-                    <TableCell>
-                      <Button variant="text" onClick={() => handleEditClick(row)} sx={{ color: "#1976d2", textTransform: "none" }}>Edit</Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-          {loading && (
-            <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
-              <CircularProgress />
-            </Box>
-          )}
-        </TableContainer>
+  <Table
+    stickyHeader
+    sx={{
+      tableLayout: "fixed", // ✅ important for equal widths
+      "& th, & td": {
+        whiteSpace: "normal",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        padding: 1, // uniform padding
+        textAlign: "center", // optional, center text
+      },
+    }}
+  >
+    <TableHead>
+      <TableRow>
+        {[
+          "Personnel Id",
+          "Name",
+          "Phone",
+          "Position",
+          "Employment Status",
+          "Supervisor ID",
+          "Assignment Status",
+          "Location",
+          "Edit",
+        ].map((header, idx) => (
+          <TableCell key={idx}>{header}</TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {paginatedRows.map((row, idx) => {
+        const employment = getStatusColor(row.employmentStatus);
+        const assignment = getStatusColor(row.assignmentStatus);
+        return (
+          <TableRow key={row.id || idx}>
+            <TableCell>{row.id || ""}</TableCell>
+            <TableCell>{row.name || "N/A"}</TableCell>
+            <TableCell>{row.phone || "N/A"}</TableCell>
+            <TableCell>{row.position || "N/A"}</TableCell>
+            <TableCell>
+              <Chip label={employment.label} color={employment.color} size="small" />
+            </TableCell>
+            <TableCell>{row.supervisorId || "N/A"}</TableCell>
+            <TableCell>
+              <Chip label={assignment.label} color={assignment.color} size="small" />
+            </TableCell>
+            <TableCell>{row.location || "N/A"}</TableCell>
+            <TableCell>
+              <Button
+                variant="text"
+                onClick={() => handleEditClick(row)}
+                sx={{ color: "#1976d2", textTransform: "none", minWidth: 0 }}
+              >
+                Edit
+              </Button>
+            </TableCell>
+          </TableRow>
+        );
+      })}
+    </TableBody>
+  </Table>
+   {loading && (
+    <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+      <CircularProgress />
+    </Box>
+  )}
+</TableContainer>
+
 
         {/* Pagination Footer */}
         <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center", px: 2 }}>
           <Typography variant="body2" sx={{ color: "gray" }}>
             {`Showing ${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, totalPersonnel)} of ${totalPersonnel} personnel`}
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Button onClick={handlePrev} disabled={currentPage === 1} variant="outlined" sx={{ minWidth: "40px", padding: "5px" }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <IconButton onClick={handlePrev} disabled={currentPage === 1} variant="outlined"  sx={{ background: "#f2f2f2" }}>
               <NavigateBeforeIcon />
-            </Button>
-            <Button onClick={handleNext} disabled={currentPage >= pageCount} variant="outlined" sx={{ minWidth: "40px", padding: "5px" }}>
+            </IconButton>
+            <IconButton onClick={handleNext} disabled={currentPage >= pageCount} variant="outlined"  sx={{ background: "#f2f2f2" }}>
               <NavigateNextIcon />
-            </Button>
+            </IconButton>
           </Box>
         </Box>
 

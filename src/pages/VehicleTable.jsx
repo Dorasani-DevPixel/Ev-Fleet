@@ -23,15 +23,9 @@ import {
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 
-import {
-  fetchVehicleDashboard,
-  fetchVehicleFiltersMetadata,
-  fetchVehicleStatusCount,
-   fetchVehiclesWithFilters
-} from "../api/vehicleService";
-
 import AddVehicleModal from "../components/AddVehicleModal";
 import EditVehicleModal from "../components/EditVehicleModal";
+import { fetchVehicleFiltersMetadata } from "../api/vehicleService";
 
 // ----------------------------------------------------------------------
 // Status color helper
@@ -118,56 +112,51 @@ export default function VehicleTable() {
   };
 
   // ------------------ FETCH VEHICLES ------------------
- const fetchVehicles = async (page) => {
-  if (loading) return;
+  const fetchVehicles = async (page) => {
+    if (loading) return;
 
-  setLoading(true);
-  try {
-    const token = pageTokens[page] || "";
+    setLoading(true);
+    try {
+      const token = pageTokens[page] || "";
 
-    const useFilterAPI =
-      debouncedSearchTerm.trim().length >= 1 ||
-      statusFilter !== "All" ||
-      vendorFilter !== "All" ||
-      locationFilter !== "All";
-
-    // Always call the filter API
-    const body = {
-      vehicleNumber: debouncedSearchTerm.trim()
-        ? debouncedSearchTerm.replace(/\s+/g, "")
-        : "",
-      status: statusFilter === "All" ? "" : statusFilter,
-      vendorName: vendorFilter === "All" ? "" : vendorFilter,
-      location: locationFilter === "All" ? "" : locationFilter,
-      pageToken: token,
-    };
-
-    const response = await fetch("https://evbackend-vajk.onrender.com/api/vehicles/filter", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer D8hL9H7s3RjP1qz0WzS8f9GhdsY1oP5J7V0yN3qS2E8",
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await response.json();
-    if (data.success) {
-      setPageData((prev) => ({ ...prev, [page]: data.vehicles || [] }));
-      setPageTokens((prev) => ({
-        ...prev,
-        [page + 1]: data.nextPageToken || null,
-      }));
-      // ✅ Update totalCount dynamically
-      if (page === 1) setTotalCount(data.totalCount || data.vehicles.length);
-    }
-  } catch (err) {
-    console.error("Error fetching vehicles:", err);
-  } finally {
-    setLoading(false);
-  }
+       const body = {
+  vehicleNumber: debouncedSearchTerm.trim().replace(/\s+/g, ""), // ONLY ONE FIELD
+  status: statusFilter === "All" ? "" : statusFilter,
+  vendorName: vendorFilter === "All" ? "" : vendorFilter,
+  location: locationFilter === "All" ? "" : locationFilter,
+  pageToken: token,
 };
 
+
+
+      const response = await fetch(
+        "https://evbackend-vajk.onrender.com/api/vehicles/filter",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Bearer D8hL9H7s3RjP1qz0WzS8f9GhdsY1oP5J7V0yN3qS2E8",
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      const data = await response.json();
+      if (data.success) {
+        setPageData((prev) => ({ ...prev, [page]: data.vehicles || [] }));
+        setPageTokens((prev) => ({
+          ...prev,
+          [page + 1]: data.nextPageToken || null,
+        }));
+        if (page === 1) setTotalCount(data.totalCount || data.vehicles.length);
+      }
+    } catch (err) {
+      console.error("Error fetching vehicles:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ------------------ INITIAL LOAD ------------------
   useEffect(() => {
@@ -200,23 +189,27 @@ export default function VehicleTable() {
 
   // ------------------ FILTER CURRENT PAGE ------------------
   const paginatedRows = (pageData[currentPage] || []).filter((row) => {
-    const matchesSearch =
-      row.plateNumber?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      row.vendorName?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      row.location?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+  const normalize = (str) => (str || "").replace(/\s+/g, "").toLowerCase();
+  const inputNorm = normalize(debouncedSearchTerm);
 
-    const matchesStatus = statusFilter === "All" || row.status === statusFilter;
-    const matchesVendor = vendorFilter === "All" || row.vendorName === vendorFilter;
-    const matchesLocation =
-      locationFilter === "All" || row.location === locationFilter;
+  const matchesSearch =
+    normalize(row.plateNumber).includes(inputNorm) ||
+    (row.plateNumber || "").toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    normalize(row.vendorName).includes(inputNorm) ||
+    normalize(row.location).includes(inputNorm);
 
-    return matchesSearch && matchesStatus && matchesVendor && matchesLocation;
-  });
+  const matchesStatus = statusFilter === "All" || row.status === statusFilter;
+  const matchesVendor = vendorFilter === "All" || row.vendorName === vendorFilter;
+  const matchesLocation = locationFilter === "All" || row.location === locationFilter;
+
+  return matchesSearch && matchesStatus && matchesVendor && matchesLocation;
+});
+
 
   // ------------------ UI ------------------
   return (
-    <Box sx={{ backgroundColor: "#f4f6f8" }}>
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
+    <Box sx={{ backgroundColor: "#f4f6f8", p: 0.5 }}>
+      <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
         {/* Header */}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>EV Fleet</Typography>
@@ -224,61 +217,102 @@ export default function VehicleTable() {
         </Box>
 
         {/* Filters */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 2, flexWrap: "wrap", backgroundColor: "#fff", p: 1, borderRadius: 1 }}>
-          <TextField size="small" placeholder="Search by Vehicle Number" variant="outlined" sx={{ width: 700 }} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-          <FormControl size="small" sx={{ minWidth: 200 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            mb: 2,
+            flexWrap: "wrap",
+            backgroundColor: "#fff",
+            p: 1,
+            borderRadius: 1,
+          }}
+        >
+          <TextField
+            size="small"
+            placeholder="Search by Vehicle Number"
+            variant="outlined"
+            sx={{ width: 300 }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Status</InputLabel>
             <Select value={statusFilter} label="Status" onChange={(e) => setStatusFilter(e.target.value)}>
               <MenuItem value="All">All</MenuItem>
               {statuses.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
             </Select>
           </FormControl>
-          <FormControl size="small" sx={{ minWidth: 200 }}>
+
+          <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Vendor</InputLabel>
             <Select value={vendorFilter} label="Vendor" onChange={(e) => setVendorFilter(e.target.value)}>
               <MenuItem value="All">All</MenuItem>
               {vendors.map((v) => <MenuItem key={v} value={v}>{v}</MenuItem>)}
             </Select>
           </FormControl>
-          <FormControl size="small" sx={{ minWidth: 200 }}>
+
+          <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Location</InputLabel>
             <Select value={locationFilter} label="Location" onChange={(e) => setLocationFilter(e.target.value)}>
               <MenuItem value="All">All</MenuItem>
               {locations.map((l) => <MenuItem key={l} value={l}>{l}</MenuItem>)}
             </Select>
           </FormControl>
+
+          <Button
+            variant="outlined"
+            color="secondary"
+            size="small"
+            sx={{ minWidth: 150,height:40 }}
+            onClick={() => {
+              setSearchTerm("");
+              setStatusFilter("All");
+              setVendorFilter("All");
+              setLocationFilter("All");
+            }}
+          >
+            Clear Filters
+          </Button>
         </Box>
 
         {/* Table */}
-        <TableContainer sx={{ maxHeight: "55vh", "& .MuiTableCell-root": { padding: 0 } }} ref={tableContainerRef}>
+        <TableContainer sx={{ maxHeight: "55vh", "& .MuiTableCell-root": { padding: 1 } }} ref={tableContainerRef}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell><b>Vendor</b></TableCell>
-                <TableCell><b>Vehicle Number</b></TableCell>
-                <TableCell><b>Status</b></TableCell>
-                <TableCell><b>Location</b></TableCell>
-                <TableCell><b>Rental Rate</b></TableCell>
-                <TableCell><b>Model</b></TableCell>
-                <TableCell><b>Make</b></TableCell>
-                <TableCell><b>Battery Type</b></TableCell>
-                <TableCell><b>Edit</b></TableCell>
+                <TableCell sx={{ width: "12.5%" }}><b>Vendor</b></TableCell>
+                <TableCell sx={{ width: "12.5%" }}><b>Vehicle Number</b></TableCell>
+                <TableCell sx={{ width: "12.5%" }}><b>Status</b></TableCell>
+                <TableCell sx={{ width: "12.5%" }}><b>Location</b></TableCell>
+                <TableCell sx={{ width: "12.5%" }}><b>Rental Rate</b></TableCell>
+                <TableCell sx={{ width: "12.5%" }}><b>Model</b></TableCell>
+                <TableCell sx={{ width: "12.5%" }}><b>Make</b></TableCell>
+                <TableCell sx={{ width: "12.5%" }}><b>Battery Type</b></TableCell>
+                <TableCell sx={{ width: "12.5%" }}><b>Edit</b></TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
               {paginatedRows.map((row, idx) => {
                 const status = getStatusColor(row.status);
                 return (
                   <TableRow key={row.id || idx}>
-                    <TableCell>{row.vendorName || "N/A"}</TableCell>
-                    <TableCell>{row.plateNumber || "N/A"}</TableCell>
-                    <TableCell><Chip label={status.label} color={status.color} size="small" /></TableCell>
-                    <TableCell>{row.location || "N/A"}</TableCell>
-                    <TableCell>₹{row.rentalRatePerDay || 0}</TableCell>
-                    <TableCell>{row.model || "N/A"}</TableCell>
-                    <TableCell>{row.type || "N/A"}</TableCell>
-                    <TableCell>{row.batteryType || "N/A"}</TableCell>
-                    <TableCell><Button variant="text" sx={{ color: "#1976d2" }} onClick={() => handleEditClick(row)}>Edit</Button></TableCell>
+                    <TableCell sx={{ width: "12.5%" }}>{row.vendorName || "N/A"}</TableCell>
+                    <TableCell sx={{ width: "12.5%" }}>{row.plateNumber || "N/A"}</TableCell>
+                    <TableCell sx={{ width: "12.5%" }}>
+                      <Chip label={status.label} color={status.color} size="small" />
+                    </TableCell>
+                    <TableCell sx={{ width: "12.5%" }}>{row.location || "N/A"}</TableCell>
+                    <TableCell sx={{ width: "12.5%" }}>₹{row.rentalRatePerDay || 0}</TableCell>
+                    <TableCell sx={{ width: "12.5%" }}>{row.model || "N/A"}</TableCell>
+                    <TableCell sx={{ width: "12.5%" }}>{row.type || "N/A"}</TableCell>
+                    <TableCell sx={{ width: "12.5%" }}>{row.batteryType || "N/A"}</TableCell>
+                    <TableCell sx={{ width: "12.5%" }} padding="none">
+                      <Button variant="text" sx={{ color: "#1976d2", textTransform: "none",p: 0, minWidth: 0  }} onClick={() => handleEditClick(row)}>Edit</Button>
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -310,7 +344,12 @@ export default function VehicleTable() {
 
         {/* Modals */}
         <AddVehicleModal open={openModal} onClose={handleCloseModal} />
-        <EditVehicleModal open={editModalOpen} onClose={() => setEditModalOpen(false)} vehicle={selectedVehicle} onSave={handleEditSave} />
+        <EditVehicleModal
+          open={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          vehicle={selectedVehicle}
+          onSave={handleEditSave}
+        />
       </Paper>
     </Box>
   );
